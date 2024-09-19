@@ -1,6 +1,6 @@
 export const handleWake = async (deviceId: string) => {
     try {
-        const res = await fetch(`http://${process.env.NEXT_PUBLIC_WEBSOCKET_URL}:8081/api/wol/${deviceId}`, {
+        const res = await fetch(`http://${process.env.NEXT_PUBLIC_WEBSOCKET_URL}/api/wol/${deviceId}`, {
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imtlbm11NSIsImlkIjoiMSIsImV4cCI6MTcyNjIyMzk0NH0.A4WQWU6B9DdgLuGzsELBdHDtCcMVu1o-qd5dgC4_CWA',

@@ -1,5 +1,4 @@
-// src/components/SideMenu.tsx
-
+'use client'
 import React from 'react';
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Collapse, colors } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';

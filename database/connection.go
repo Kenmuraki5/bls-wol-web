@@ -27,4 +27,8 @@ func Connect() {
 	if err != nil {
 		panic(err)
 	}
+	err = connection.AutoMigrate(&models.WakeLog{})
+	if err != nil {
+		panic(err)
+	}
 }

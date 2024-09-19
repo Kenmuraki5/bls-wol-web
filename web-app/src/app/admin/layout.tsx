@@ -18,11 +18,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-white overflow-visible text-black">
-          <Navbar />
-          <AdminLayout>
-            {children}
-          </AdminLayout>
+      <body>
+        <Navbar />
+        <AdminLayout>
+          {children}
+        </AdminLayout>
       </body>
     </html>
   );
