@@ -1,5 +1,6 @@
 'use server'
 import ActivityLogs from '@/components/Dashboard/ActivityLogs';
+import NetworkStatisticsCard from '@/components/Dashboard/IpStatistics';
 import OfflineDevicesCard from '@/components/Dashboard/OfflineDevicesCard';
 import OnlineDevicesCard from '@/components/Dashboard/OnlineDevicesCard';
 import QuickActions from '@/components/Dashboard/QuickActions';
@@ -39,6 +40,8 @@ export default async function Dashboard() {
 
                 {/* Scheduled Wake-ups */}
                 <SchedulesWakeUp />
+                {/* Network Static */}
+                <NetworkStatisticsCard />
             </Grid>
 
             {/* Quick Actions */}

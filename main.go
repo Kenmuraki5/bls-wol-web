@@ -1,13 +1,11 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	"bls-wol-web/controllers"
 	"bls-wol-web/database"
 	"bls-wol-web/routes"
 
@@ -30,7 +28,7 @@ func main() {
 
 	// Connect to the database
 	database.Connect()
-	database.InitRedis()
+	// database.InitRedis()
 
 	// Initialize the router
 	r := mux.NewRouter()
@@ -50,11 +48,11 @@ func main() {
 		log.Fatalf("Error starting server: %v", err)
 	}
 
-	numWorkers := 10 // จำนวน worker ที่จะรัน
-	ctx := context.Background()
-	for i := 0; i < numWorkers; i++ {
-		go controllers.SendMagicPacket(database.RedisClient, ctx)
-	}
+	// numWorkers := 10 // จำนวน worker ที่จะรัน
+	// ctx := context.Background()
+	// for i := 0; i < numWorkers; i++ {
+	// 	go controllers.SendMagicPacket(database.RedisClient, ctx)
+	// }
 
 	// รอให้ worker ทำงาน
 	select {}

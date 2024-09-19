@@ -3,7 +3,7 @@ import React from 'react'
 
 export default function OfflineDevicesCard() {
     return (
-        <Grid item xs={12} sm={4}>
+        <Grid item xs={12} md={3} sm={6}>
             <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
                 <CardContent>
                     <Typography variant="h6" color="secondary" gutterBottom>
