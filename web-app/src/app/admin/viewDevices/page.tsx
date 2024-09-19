@@ -1,17 +1,12 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import Navbar from '@/components/Navbar';
-import SideMenu from '@/components/SideMenu';
 import {
   Box,
-  Button,
   Typography,
   CircularProgress,
-  Tooltip,
   IconButton,
   Grid,
   useMediaQuery,
-  Drawer,
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import {
@@ -21,7 +16,7 @@ import {
   ContentCopy,
   Menu as MenuIcon,
 } from '@mui/icons-material';
-import AdminLayout from '@/components/Admin/AdminLayout';
+import WifiIcon from '@mui/icons-material/Wifi';
 
 const ViewDevicesPage = () => {
   const [deviceData, setDeviceData] = useState<any[]>([]);
@@ -62,8 +57,9 @@ const ViewDevicesPage = () => {
       headerName: 'Status',
       width: 150,
       renderCell: (params: any) => (
-        <Box sx={{ color: params.value === 'online' ? 'green' : 'red', fontWeight: 'bold' }}>
-          {params.value === 'online' ? '● Online' : '● Offline'}
+        <Box>
+          <WifiIcon sx={{ color: params.value === 'online' ? 'green' : 'red' }} />
+          {params.value === 'online' ? 'Online' : 'Offline'}
         </Box>
       ),
     },

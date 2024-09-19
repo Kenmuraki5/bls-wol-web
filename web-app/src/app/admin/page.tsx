@@ -19,7 +19,7 @@ export default async function Dashboard() {
         console.log(error);
     }
     return (
-        <div>
+        <div className='text-black'>
             {/* Header */}
             <Box className="mb-8">
                 <Typography variant="h4" component="h1" className="text-primary mb-4">
@@ -32,20 +32,28 @@ export default async function Dashboard() {
 
             {/* Status Cards */}
             <Grid container spacing={4}>
-                {/* Online Devices Card */}
-                <OnlineDevicesCard />
-
-                {/* Offline Devices Card */}
-                <OfflineDevicesCard />
-
-                {/* Scheduled Wake-ups */}
-                <SchedulesWakeUp />
+                <Grid container spacing={4} item xs={12} sm={12} md={9}>
+                    {/* Online Devices Card */}
+                    <Grid item xs={12} sm={6} md={4}>
+                        <OnlineDevicesCard />
+                    </Grid>
+                    {/* Offline Devices Card */}
+                    <Grid item xs={12} sm={6} md={4}>
+                        <OfflineDevicesCard />
+                    </Grid>
+                    {/* Scheduled Wake-ups */}
+                    <Grid item xs={12} sm={6} md={4}>
+                        <SchedulesWakeUp />
+                    </Grid>
+                    <Grid item xs={12} md={12}>
+                        <QuickActions />
+                    </Grid>
+                </Grid>
                 {/* Network Static */}
-                <NetworkStatisticsCard />
+                <Grid item xs={12} sm={12} md={3}>
+                    <NetworkStatisticsCard />
+                </Grid>
             </Grid>
-
-            {/* Quick Actions */}
-            <QuickActions />
 
             {/* Activity Logs */}
             <ActivityLogs data_wakeLogs={data_wakeLogs} />

@@ -8,7 +8,7 @@ export default function QuickActions() {
                 Quick Actions
             </Typography>
             <Grid container spacing={4}>
-                <Grid item xs={12} sm={6} md={4}>
+                <Grid item xs={12} md={4}>
                     <Card className="p-4">
                         <Typography variant="h6" gutterBottom>
                             Wake All Devices
@@ -19,7 +19,7 @@ export default function QuickActions() {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={4}>
+                <Grid item xs={12} md={4}>
                     <Card className="p-4">
                         <Typography variant="h6" gutterBottom>
                             Add New Device
@@ -30,7 +30,7 @@ export default function QuickActions() {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={4}>
+                <Grid item xs={12} md={4}>
                     <Card className="p-4">
                         <Typography variant="h6" gutterBottom>
                             View Network Map

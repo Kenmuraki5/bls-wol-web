@@ -11,9 +11,8 @@ const dashboardData = {
 
 export default function NetworkStatisticsCard() {
     return (
-        <Grid item xs={12} sm={3}>
             <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
-                <CardContent>
+                <CardContent className='h-64'>
                     <Typography variant="h6" gutterBottom align="center">
                         Network Overview
                     </Typography>
@@ -70,6 +69,5 @@ export default function NetworkStatisticsCard() {
                     </Grid>
                 </CardContent>
             </Card>
-        </Grid>
     );
 }
