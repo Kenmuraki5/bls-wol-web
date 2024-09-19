@@ -28,8 +28,11 @@ func Setup(r *mux.Router) {
 
 	r.HandleFunc("/events/{userId:[0-9]+}", controllers.EventsHandler).Methods("GET")
 	r.HandleFunc("/admin/{networkId:[0-9]+}", controllers.AdminMonitor).Methods("GET")
-	// r.HandleFunc("/admin/{networkId:[0-9]+}", controllers.AdminMonitor2).Methods("GET")
-	// // WebSocket handlers
-	// r.HandleFunc("/ws", websocket.Handler(controllers.HandleWebSocket))
-	// r.HandleFunc("/sse/{userId:[0-9]+}", websocket.Handler(controllers.HandleWebSocket2))
+
+	r.HandleFunc("/admin/wakeLog", controllers.GetWakeLogs).Methods("GET")
+
+	// r.HandleFunc("/schedule-wake-on-lan", func(w http.ResponseWriter, r *http.Request) {
+	// 	controllers.ScheduleWakeOnLan(w, r, database.RedisClient, database.Ctx)
+	// }).Methods("POST")
+
 }

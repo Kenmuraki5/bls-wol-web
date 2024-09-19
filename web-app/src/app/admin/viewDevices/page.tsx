@@ -89,7 +89,7 @@ const ViewDevicesPage = () => {
   };
 
   return (
-    <div>
+    <div className='overflow-hidden'>
       <Typography variant="h4" component="h1" className="text-primary" color="black">
         Wake-on-lan Devices
       </Typography>

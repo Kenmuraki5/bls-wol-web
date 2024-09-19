@@ -76,7 +76,6 @@ func AdminMonitor(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	networkId := vars["networkId"]
 
-	fmt.Println(networkId)
 	for {
 		var computers []models.Computer
 		if err := database.DB.Where("network_id = ?", networkId).Preload("Network").Find(&computers).Error; err != nil {

@@ -26,10 +26,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Box
             sx={{
               position: 'fixed',
-              top: navbarHeight, // Start the sidebar below the navbar
+              top: navbarHeight,
               left: 0,
               width: '250px',
-              height: `calc(100vh - ${navbarHeight})`, // Adjust height to fill the screen below the navbar
+              height: `calc(100vh - ${navbarHeight})`,
               borderRight: '1px solid #ddd',
               zIndex: 1000,
               display: 'flex',
@@ -45,10 +45,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <Box
         sx={{
           flex: 1,
-          mt: 5,
+          mt: navbarHeight,
           ml: isSidebarOpen && !isMobile ? '250px' : '0',
-          // pt: navbarHeight,
-          overflowx: 'hidden',
+          overflowX: 'hidden',
           p: { xs: 2, md: 3 },
           position: 'relative',
           display: isMobile && isSidebarOpen ? 'none' : 'block',
@@ -60,7 +59,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </IconButton>
         </header>
         
-        {children}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            // Adjust layout and padding for different screen sizes
+            p: { xs: 1, sm: 2, md: 3 },
+            maxWidth: { xs: '100%', md: '1200px' }, // Example max width for larger screens
+            mx: 'auto',
+          }}
+        >
+          {children}
+        </Box>
       </Box>
     </Box>
   );
