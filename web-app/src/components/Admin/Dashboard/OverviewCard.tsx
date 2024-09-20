@@ -9,7 +9,7 @@ const dashboardData = {
     devices: 100,
 };
 
-export default function NetworkStatisticsCard() {
+export default function OverviewCard() {
     return (
             <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
                 <CardContent className='h-64'>

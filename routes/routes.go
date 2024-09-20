@@ -21,14 +21,15 @@ func Setup(r *mux.Router) {
 	r.HandleFunc("/api/computers", controllers.AddComputer).Methods("POST")
 	r.HandleFunc("/api/computers/{id:[0-9]+}", controllers.DeleteComputer).Methods("DELETE")
 
+	r.HandleFunc("/api/wols", controllers.Wols).Methods("POST")
 	r.HandleFunc("/api/wol/{id:[0-9]+}", controllers.Wol).Methods("POST")
 	r.HandleFunc("/api/wolClient", controllers.WolClient).Methods("POST")
 
 	r.HandleFunc("/api/computerr/{id:[0-9]+}", controllers.GetComputersByOrganizationId).Methods("GET")
 
 	r.HandleFunc("/events/{userId:[0-9]+}", controllers.EventsHandler).Methods("GET")
-	r.HandleFunc("/admin/{networkId:[0-9]+}", controllers.AdminMonitor).Methods("GET")
-
+	r.HandleFunc("/admin/{networkId:[0-9]+}", controllers.AdminMonitorByNetwork).Methods("GET")
+	r.HandleFunc("/admin/devices", controllers.AdminMonitorAllDevices).Methods("GET")
 	r.HandleFunc("/admin/wakeLog", controllers.GetWakeLogs).Methods("GET")
 
 	// r.HandleFunc("/schedule-wake-on-lan", func(w http.ResponseWriter, r *http.Request) {

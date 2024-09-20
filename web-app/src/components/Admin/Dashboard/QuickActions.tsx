@@ -13,9 +13,11 @@ export default function QuickActions() {
                         <Typography variant="h6" gutterBottom>
                             Wake All Devices
                         </Typography>
-                        <Button variant="contained" color="primary" fullWidth >
-                            <a href='/admin/send-wol-signal'>Wake Now</a>
-                        </Button>
+                        <a href='/admin/wol-Actions/send-wol-signal'>
+                            <Button variant="contained" color="primary" fullWidth >
+                                Wake NOW
+                            </Button>
+                        </a>
                     </Card>
                 </Grid>
 
@@ -24,23 +26,25 @@ export default function QuickActions() {
                         <Typography variant="h6" gutterBottom>
                             Add New Device
                         </Typography>
-                        <Button variant="outlined" color="secondary" fullWidth>
-                            Add Device
-                        </Button>
+                        <a href='/admin/wol-Actions/send-wol-signal'>
+                            <Button variant="contained" color="primary" fullWidth >
+                                ADD DEVICE
+                            </Button>
+                        </a>
                     </Card>
                 </Grid>
 
                 <Grid item xs={12} md={4}>
                     <Card className="p-4">
                         <Typography variant="h6" gutterBottom>
-                            View Network Map
+                           NetWork Configure
                         </Typography>
                         <Button variant="outlined" color="info" fullWidth>
-                            Open Map
+                            CONFIGURE NETWORKS
                         </Button>
                     </Card>
                 </Grid>
-                
+
             </Grid>
         </Box>
     )

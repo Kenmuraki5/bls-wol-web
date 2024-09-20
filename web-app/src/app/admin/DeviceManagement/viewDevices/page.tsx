@@ -7,8 +7,9 @@ import {
   IconButton,
   Grid,
   useMediaQuery,
+  Button,
 } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridRowModesModel, GridRowsProp, GridSlots, GridToolbarContainer } from '@mui/x-data-grid';
 import {
   Close,
   Minimize,
@@ -17,20 +18,57 @@ import {
   Menu as MenuIcon,
 } from '@mui/icons-material';
 import WifiIcon from '@mui/icons-material/Wifi';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { handleWakeMoreDevice } from '@/lib/wake';
+import SettingsModal from '@/components/Admin/DeviceManagement/SettingsModal';
+
+interface EditToolbarProps {
+  setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
+  setRowModesModel: (
+    newModel: (oldModel: GridRowModesModel) => GridRowModesModel,
+  ) => void;
+}
+
+function EditToolbar(props: EditToolbarProps) {
+  const { selected, setOpenSettingModal }: any = props;
+  const handleWakeUpClick = async () => {
+    try {
+      await handleWakeMoreDevice({ "ids": selected });
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
+    }
+  };
+
+  const handleSettingsClick = () => {
+    setOpenSettingModal(true)
+  };
+
+  return (
+    <GridToolbarContainer>
+      <Button color="info" startIcon={<PowerSettingsNewIcon />} onClick={handleWakeUpClick}>
+        Wake Up Now
+      </Button>
+      <Button color="info" startIcon={<SettingsIcon />} onClick={handleSettingsClick}>
+        Settings
+      </Button>
+    </GridToolbarContainer>
+  );
+}
 
 const ViewDevicesPage = () => {
   const [deviceData, setDeviceData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDevices, setSelectedDevices] = useState<any[]>([]);
   const [selectedDetail, setSelectedDetail] = useState<any | null>(null);
   const [isOverlayVisible, setOverlayVisible] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
-  const [isSidebarOpen, setSidebarOpen] = useState(true); // Sidebar visibility state
-  const isMobile = useMediaQuery('(max-width:600px)'); // Media query to detect mobile view
-  const navbarHeight = '64px'; // Set the height of the navbar
+
+  const [selected, setSelectedAction] = useState<any | null>(null);
+
+  const [openSettingModal, setOpenSettingModal] = useState(false);
 
   useEffect(() => {
-    const eventSource = new EventSource(`http://${process.env.NEXT_PUBLIC_WEBSOCKET_URL}/admin/2`);
+    const eventSource = new EventSource(`http://${process.env.NEXT_PUBLIC_WEBSOCKET_URL}/admin/devices`);
     eventSource.onopen = () => setLoading(true);
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -58,7 +96,7 @@ const ViewDevicesPage = () => {
       width: 150,
       renderCell: (params: any) => (
         <Box>
-          <WifiIcon sx={{ color: params.value === 'online' ? 'green' : 'red' }} />
+          <WifiIcon sx={{ color: params.value === 'online' ? 'green' : 'red', fontWeight: 'bold' }} />
           {params.value === 'online' ? 'Online' : 'Offline'}
         </Box>
       ),
@@ -70,6 +108,7 @@ const ViewDevicesPage = () => {
     const detail = deviceData.find((device) => device.id === selectedId);
     setSelectedDetail(detail);
     setOverlayVisible(true);
+    setSelectedAction(selection)
   };
 
   const handleCloseOverlay = () => {
@@ -80,9 +119,6 @@ const ViewDevicesPage = () => {
     setIsMaximized((prevState) => !prevState);
   };
 
-  const handleToggleSidebar = () => {
-    setSidebarOpen((prev) => !prev);
-  };
 
   return (
     <div className='overflow-hidden'>
@@ -92,7 +128,7 @@ const ViewDevicesPage = () => {
       <Typography variant="subtitle1" component="p" color="textSecondary">
         Monitor the status and manage Devices in your organization.
       </Typography>
-      <Box sx={{ height: 600, width: '100%', position: 'relative', mt: 2 }}>
+      <Box sx={{ height: 700, width: '100%', position: 'relative', mt: 2 }}>
         {loading && (
           <Box
             sx={{
@@ -117,8 +153,13 @@ const ViewDevicesPage = () => {
           pageSizeOptions={[10, 20, 30]}
           checkboxSelection
           onRowSelectionModelChange={(newSelection: any) => {
-            setSelectedDevices(newSelection);
             handleRowSelection(newSelection);
+          }}
+          slots={{
+            toolbar: EditToolbar as GridSlots['toolbar'],
+          }}
+          slotProps={{
+            toolbar: { selected, setOpenSettingModal },
           }}
           sx={{
             backgroundColor: '#ffffff',
@@ -246,6 +287,7 @@ const ViewDevicesPage = () => {
           </Box>
         )}
       </Box>
+      <SettingsModal selectedDetail={selectedDetail} openSettingModal={openSettingModal} setOpenSettingModal={setOpenSettingModal}/>
     </div>
   );
 };

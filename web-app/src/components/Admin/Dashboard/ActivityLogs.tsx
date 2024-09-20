@@ -30,7 +30,7 @@ const ActivityLogs = ({ data_wakeLogs }: any) => {
       case 'failed':
         return 'red';
       default:
-        return 'grey'; // Default color if status is unknown
+        return 'grey';
     }
   };
 
@@ -53,7 +53,7 @@ const ActivityLogs = ({ data_wakeLogs }: any) => {
         );
       },
     },
-    { field: 'created_at', headerName: 'Created At', width: 200 },
+    { field: 'created_at', headerName: 'Time', width: 200 },
   ];
 
   const rows = filteredRows.map((log: any) => ({
@@ -66,11 +66,7 @@ const ActivityLogs = ({ data_wakeLogs }: any) => {
   }));
 
   return (
-    <Box className="mt-8">
-      <Typography variant="h5" className="mb-4">
-        Recent Activity Logs
-      </Typography>
-
+    <Box>
       <Card className="shadow-sm p-4 bg-slate-50">
         {/* Search Bar with Icon */}
         <TextField
@@ -89,7 +85,7 @@ const ActivityLogs = ({ data_wakeLogs }: any) => {
           }}
         />
         {rows.length > 0 ? (
-          <div style={{ height: 400, width: '100%', backgroundColor: 'white' }}>
+          <div style={{ height: 450, width: '100%', backgroundColor: 'white' }}>
             <DataGrid rows={rows} columns={columns} />
           </div>
         ) : (

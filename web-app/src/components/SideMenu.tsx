@@ -33,14 +33,14 @@ const SideMenu: React.FC = () => {
   const router = useRouter();
   const path = usePathname();
 
-  const handleActiveItem = (item: string) => {
+  const Navigate = (item: string) => {
     router.push("/admin/" + item)
   };
 
   return (
     <List sx={{ color: 'black' }}>
       {/* Dashboard */}
-      <ListItemButton onClick={() => handleActiveItem('')}>
+      <ListItemButton onClick={() => Navigate('')}>
         <ListItemIcon>
           <DashboardIcon style={{color: path === '/admin' ? '#3B82F6' : '#0009'}} />
         </ListItemIcon>
@@ -60,15 +60,19 @@ const SideMenu: React.FC = () => {
       </ListItemButton>
       <Collapse in={open.deviceManagement} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          <ListItemButton sx={{ pl: 4 }} onClick={() => handleActiveItem("viewDevices")}>
+          <ListItemButton sx={{ pl: 4 }} onClick={() => Navigate("DeviceManagement/viewDevices")}>
             <ListItemText
               secondaryTypographyProps={{
                 fontSize: 15,
-                color: path === '/admin/viewDevices' ? '#3B82F6' : '#0009'
+                color: path === '/admin/DeviceManagement/viewDevices' ? '#3B82F6' : '#0009'
               }} secondary="View Devices" />
           </ListItemButton>
-          <ListItemButton sx={{ pl: 4 }}>
-            <ListItemText secondary="Add Device" />
+          <ListItemButton sx={{ pl: 4 }} onClick={() => Navigate("DeviceManagement/addDevices")}>
+            <ListItemText
+              secondaryTypographyProps={{
+                fontSize: 15,
+                color: path === '/admin/DeviceManagement/addDevices' ? '#3B82F6' : '#0009'
+              }} secondary="Add Device" />
           </ListItemButton>
         </List>
       </Collapse>
@@ -83,16 +87,21 @@ const SideMenu: React.FC = () => {
       </ListItemButton>
       <Collapse in={open.wolActions} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          <ListItemButton sx={{ pl: 4 }} onClick={() => handleActiveItem("send-wol-signal")}>
+          <ListItemButton sx={{ pl: 4 }} onClick={() => Navigate("wol-Actions/send-wol-signal")}>
             <ListItemText
               secondaryTypographyProps={{
                 fontSize: 15,
-                color: path === '/admin/send-wol-signal' ? '#3B82F6' : '#0009'
+                color: path === '/admin/wol-Actions/send-wol-signal' ? '#3B82F6' : '#0009'
               }}
               secondary="Send WOL Signal" />
           </ListItemButton>
-          <ListItemButton sx={{ pl: 4 }}>
-            <ListItemText secondary="Schedule WOL" />
+          <ListItemButton sx={{ pl: 4 }}  onClick={() => Navigate("wol-Actions/scheduler")}>
+            <ListItemText 
+              secondaryTypographyProps={{
+                fontSize: 15,
+                color: path === '/admin/wol-Actions/scheduler' ? '#3B82F6' : '#0009'
+              }}
+              secondary="Schedule WOL" />
           </ListItemButton>
         </List>
       </Collapse>
@@ -107,8 +116,13 @@ const SideMenu: React.FC = () => {
       </ListItemButton>
       <Collapse in={open.networkManagement} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          <ListItemButton sx={{ pl: 4 }}>
-            <ListItemText secondary="View Networks" />
+          <ListItemButton sx={{ pl: 4 }} onClick={() => Navigate("NetworkManagement/viewNetworks")}>
+            <ListItemText 
+              secondaryTypographyProps={{
+                fontSize: 15,
+                color: path === '/admin/NetworkManagement/viewNetworks' ? '#3B82F6' : '#0009'
+              }}
+              secondary="View Networks" />
           </ListItemButton>
           <ListItemButton sx={{ pl: 4 }}>
             <ListItemText secondary="Configure Networks" />
@@ -117,61 +131,17 @@ const SideMenu: React.FC = () => {
       </Collapse>
 
       {/* Logs & Activity Monitoring */}
-      <ListItemButton onClick={() => handleClick('logs')}>
-        <ListItemIcon>
+      <ListItemButton onClick={() => Navigate("LogMonitoring")}>
+        <ListItemIcon style={{color: path === '/admin/LogMonitoring' ? '#3B82F6' : '#0009'}}>
           <AssignmentIcon />
         </ListItemIcon>
-        <ListItemText secondary="Logs & Activity Monitoring" />
-        {open.logs ? <ExpandLess /> : <ExpandMore />}
+        <ListItemText
+          secondaryTypographyProps={{
+            fontSize: 15,
+            color: path === '/admin/LogMonitoring' ? '#3B82F6' : '#0009'
+          }}
+          secondary="Logs & Activity Monitoring" />
       </ListItemButton>
-      <Collapse in={open.logs} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
-          <ListItemButton sx={{ pl: 4 }}>
-            <ListItemText secondary="WOL Logs" />
-          </ListItemButton>
-          <ListItemButton sx={{ pl: 4 }}>
-            <ListItemText secondary="Activity Logs" />
-          </ListItemButton>
-        </List>
-      </Collapse>
-
-      {/* User Management */}
-      <ListItemButton onClick={() => handleClick('userManagement')}>
-        <ListItemIcon>
-          <PeopleIcon />
-        </ListItemIcon>
-        <ListItemText secondary="User Management" />
-        {open.userManagement ? <ExpandLess /> : <ExpandMore />}
-      </ListItemButton>
-      <Collapse in={open.userManagement} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
-          <ListItemButton sx={{ pl: 4 }}>
-            <ListItemText secondary="View Users" />
-          </ListItemButton>
-          <ListItemButton sx={{ pl: 4 }}>
-            <ListItemText secondary="Add User" />
-          </ListItemButton>
-        </List>
-      </Collapse>
-
-      {/* Reports */}
-      <ListItemButton onClick={() => handleClick('reports')}>
-        <ListItemIcon>
-          <AssignmentIcon />
-        </ListItemIcon>
-        <ListItemText secondary="Reports" />
-        {open.reports ? <ExpandLess /> : <ExpandMore />}
-      </ListItemButton>
-      <Collapse in={open.reports} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
-          <ListItemButton sx={{ pl: 4 }}>
-            <ListItemText secondary="Generate Reports" />
-          </ListItemButton>
-          <ListItemButton sx={{ pl: 4 }}>
-            <ListItemText secondary="View Reports" />
-          </ListItemButton>
-        </List>
-      </Collapse>
 
       {/* Settings */}
       <ListItemButton>

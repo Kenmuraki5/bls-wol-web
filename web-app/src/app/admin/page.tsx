@@ -1,10 +1,10 @@
 'use server'
-import ActivityLogs from '@/components/Dashboard/ActivityLogs';
-import NetworkStatisticsCard from '@/components/Dashboard/IpStatistics';
-import OfflineDevicesCard from '@/components/Dashboard/OfflineDevicesCard';
-import OnlineDevicesCard from '@/components/Dashboard/OnlineDevicesCard';
-import QuickActions from '@/components/Dashboard/QuickActions';
-import SchedulesWakeUp from '@/components/Dashboard/SchedulesWakeUp';
+import ActivityLogs from '@/components/Admin/Dashboard/ActivityLogs';
+import OfflineDevicesCard from '@/components/Admin/Dashboard/OfflineDevicesCard';
+import OnlineDevicesCard from '@/components/Admin/Dashboard/OnlineDevicesCard';
+import OverviewCard from '@/components/Admin/Dashboard/OverviewCard';
+import QuickActions from '@/components/Admin/Dashboard/QuickActions';
+import SchedulesWakeUp from '@/components/Admin/Dashboard/SchedulesWakeUp';
 import { Typography, Grid, Card, CardContent, Button, Box } from '@mui/material'
 import React from 'react'
 
@@ -51,11 +51,14 @@ export default async function Dashboard() {
                 </Grid>
                 {/* Network Static */}
                 <Grid item xs={12} sm={12} md={3}>
-                    <NetworkStatisticsCard />
+                    <OverviewCard />
                 </Grid>
             </Grid>
 
             {/* Activity Logs */}
+            <Typography variant="h5" className="mt-8 mb-4">
+                Recent Activity Logs
+            </Typography>
             <ActivityLogs data_wakeLogs={data_wakeLogs} />
         </div>
     )

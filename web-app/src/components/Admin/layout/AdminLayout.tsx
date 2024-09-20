@@ -66,7 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             gap: 2,
             // Adjust layout and padding for different screen sizes
             p: { xs: 1, sm: 2, md: 3 },
-            maxWidth: { xs: '100%', md: '1200px' }, // Example max width for larger screens
+            maxWidth: { xs: '100%', md: '100%' }, // Example max width for larger screens
             mx: 'auto',
           }}
         >
