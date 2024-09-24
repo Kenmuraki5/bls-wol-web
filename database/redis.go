@@ -11,7 +11,7 @@ var RedisClient *redis.Client
 var Ctx = context.Background()
 
 func InitRedis() {
-	redisAddr := "10.5.0.173:6379" // หรืออ่านจาก .env
+	redisAddr := "192.168.1.45:6379"
 	RedisClient = redis.NewClient(&redis.Options{
 		Addr: redisAddr,
 	})

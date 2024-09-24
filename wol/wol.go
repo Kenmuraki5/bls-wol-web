@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func WakeOnLan(macAddress string, ipAddress string, networkAddress string, port uint32) error {
+func WakeOnLan(macAddress string, ipAddress string, broadcastAddress string, port uint32) error {
 	macAddress = strings.ReplaceAll(macAddress, ":", "")
 	macAddress = strings.ReplaceAll(macAddress, "-", "")
 
@@ -31,7 +31,7 @@ func WakeOnLan(macAddress string, ipAddress string, networkAddress string, port 
 		magicPacket = append(magicPacket, macBytes...)
 	}
 
-	addr, err := net.ResolveUDPAddr("udp", networkAddress+":"+strconv.FormatInt(int64(port), 10))
+	addr, err := net.ResolveUDPAddr("udp", broadcastAddress+":"+strconv.FormatInt(int64(port), 10))
 	if err != nil {
 		return err
 	}

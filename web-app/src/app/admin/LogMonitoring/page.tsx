@@ -1,12 +1,11 @@
 'use server';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
     Box,
     Typography,
     CircularProgress,
 } from '@mui/material';
-import { DataGrid, GridRowModesModel, GridRowsProp, GridSlots, GridToolbarContainer } from '@mui/x-data-grid';
-import WifiIcon from '@mui/icons-material/Wifi';
+import { GridRowModesModel, GridRowsProp } from '@mui/x-data-grid';
 import ActivityLogs from '@/components/Admin/Dashboard/ActivityLogs';
 
 
@@ -26,26 +25,6 @@ const LogMonitorPage = async () => {
     } catch (error) {
         console.log(error);
     }
-
-    const columns = [
-        { field: 'id', headerName: 'ID', width: 90 },
-        { field: 'name', headerName: 'Name', width: 250 },
-        { field: 'ip', headerName: 'IP Address', width: 150 },
-        { field: 'mac', headerName: 'MAC Address', width: 200 },
-        { field: 'port', headerName: 'Port', width: 80 },
-        {
-            field: 'status',
-            headerName: 'Status',
-            width: 150,
-            renderCell: (params: any) => (
-                <Box>
-                    <WifiIcon sx={{ color: params.value === 'online' ? 'green' : 'red', fontWeight: 'bold' }} />
-                    {params.value === 'online' ? 'Online' : 'Offline'}
-                </Box>
-            ),
-        },
-    ];
-
 
     return (
         <div className='overflow-hidden'>

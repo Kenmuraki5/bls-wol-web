@@ -5,11 +5,12 @@ import (
 	"bls-wol-web/middleware"
 	"net/http"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
 )
 
 // Setup function to configure routes
-func Setup(r *mux.Router) {
+func Setup(r *mux.Router, redisClient *redis.Client) {
 	// Middleware
 	r.HandleFunc("/api/users/register", controllers.Register).Methods("POST")
 	r.HandleFunc("/api/users/login", controllers.Login).Methods("POST")
@@ -32,8 +33,6 @@ func Setup(r *mux.Router) {
 	r.HandleFunc("/admin/devices", controllers.AdminMonitorAllDevices).Methods("GET")
 	r.HandleFunc("/admin/wakeLog", controllers.GetWakeLogs).Methods("GET")
 
-	// r.HandleFunc("/schedule-wake-on-lan", func(w http.ResponseWriter, r *http.Request) {
-	// 	controllers.ScheduleWakeOnLan(w, r, database.RedisClient, database.Ctx)
-	// }).Methods("POST")
-
+	r.HandleFunc("/api/wake-up-jobs", controllers.GetWakeUpJobs(redisClient)).Methods("GET")
+	r.HandleFunc("/set-wake-up-time", controllers.SetWakeUpTime(redisClient)).Methods("POST")
 }

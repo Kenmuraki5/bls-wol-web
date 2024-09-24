@@ -16,7 +16,7 @@ export default function SendWoLSignalPage() {
     const payloadData = {
       mac_address: macAddress,
       ip_address: pingAddress,
-      network_address: ipAddress,
+      broadcast_address: ipAddress,
       port: 9
     };
   
