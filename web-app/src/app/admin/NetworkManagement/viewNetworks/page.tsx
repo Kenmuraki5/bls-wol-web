@@ -1,12 +1,21 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { DataGrid, GridSlots, GridToolbar } from '@mui/x-data-grid';
+import SettingsModal from '@/components/Admin/NetworkManagement/SettingsModal';
+import EditNetworkToolbar from '@/components/Admin/NetworkManagement/EditNetworkToolbar';
+import NetworkDetailsOverlay from '@/components/Admin/NetworkManagement/NetworkDetailsOverlay';
 
 export default function Page() {
-  const [deviceData, setDeviceData] = useState([]);
+  const [deviceData, setDeviceData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState([]);
+  const [selectedDetail, setSelectedDetail] = useState<any | null>(null);
+  const [isOverlayVisible, setOverlayVisible] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
+
+  const [selected, setSelectedAction] = useState<any | null>(null);
+
+  const [openSettingModal, setOpenSettingModal] = useState(false);
 
   const columns = [
     { field: 'network_id', headerName: 'Network ID', width: 90 },
@@ -15,6 +24,7 @@ export default function Page() {
     { field: 'subnet_mask', headerName: 'Subnet Mask', width: 200 },
     { field: 'broadcast_address', headerName: 'Broadcast Address', width: 150 }
   ];
+  
 
   const fetchDeviceData = async () => {
     // Mock data for demonstration
@@ -37,8 +47,21 @@ export default function Page() {
     fetchDeviceData();
   }, []);
 
-  const handleRowSelection = (newSelection) => {
-    setSelected(newSelection);
+  const handleRowSelection = (selection: any) => {
+    const selectedId = selection[0];
+    const detail = deviceData.find((device) => device.id === selectedId);
+    setSelectedDetail(detail);
+    setOverlayVisible(true);
+    setSelectedAction(selection)
+  };
+
+
+  const handleCloseOverlay = () => {
+    setOverlayVisible(false);
+  };
+
+  const handleToggleMaximize = () => {
+    setIsMaximized((prevState) => !prevState);
   };
 
   return (
@@ -73,7 +96,15 @@ export default function Page() {
             columns={columns}
             pageSizeOptions={[10, 20, 30]}
             checkboxSelection
-            onRowSelectionModelChange={handleRowSelection}
+            onRowSelectionModelChange={(newSelection: any) => {
+              handleRowSelection(newSelection);
+            }}
+            slots={{
+              toolbar: EditNetworkToolbar as GridSlots['toolbar'],
+            }}
+            slotProps={{
+              toolbar: { selected, setOpenSettingModal },
+            }}
             sx={{
               backgroundColor: '#ffffff',
               '& .MuiDataGrid-row': {
@@ -88,7 +119,15 @@ export default function Page() {
             }}
           />
         )}
+        <NetworkDetailsOverlay
+          isOverlayVisible={isOverlayVisible}
+          selectedDetail={selectedDetail}
+          isMaximized={isMaximized}
+          handleToggleMaximize={handleToggleMaximize}
+          handleCloseOverlay={handleCloseOverlay}
+        />
       </Box>
+      <SettingsModal selectedDetail={selectedDetail} openSettingModal={openSettingModal} setOpenSettingModal={setOpenSettingModal}/>
     </div>
   );
 }

@@ -6,10 +6,8 @@ import {
   CircularProgress,
   IconButton,
   Grid,
-  useMediaQuery,
-  Button,
 } from '@mui/material';
-import { DataGrid, GridRowModesModel, GridRowsProp, GridSlots, GridToolbarContainer } from '@mui/x-data-grid';
+import { DataGrid, GridSlots } from '@mui/x-data-grid';
 import {
   Close,
   Minimize,
@@ -18,43 +16,9 @@ import {
   Menu as MenuIcon,
 } from '@mui/icons-material';
 import WifiIcon from '@mui/icons-material/Wifi';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import SettingsIcon from '@mui/icons-material/Settings';
-import { handleWakeMoreDevice } from '@/lib/wake';
 import SettingsModal from '@/components/Admin/DeviceManagement/SettingsModal';
-
-interface EditToolbarProps {
-  setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
-  setRowModesModel: (
-    newModel: (oldModel: GridRowModesModel) => GridRowModesModel,
-  ) => void;
-}
-
-function EditToolbar(props: EditToolbarProps) {
-  const { selected, setOpenSettingModal }: any = props;
-  const handleWakeUpClick = async () => {
-    try {
-      await handleWakeMoreDevice({ "ids": selected });
-    } catch (error) {
-      console.error('Error in handleSubmit:', error);
-    }
-  };
-
-  const handleSettingsClick = () => {
-    setOpenSettingModal(true)
-  };
-
-  return (
-    <GridToolbarContainer>
-      <Button color="info" startIcon={<PowerSettingsNewIcon />} onClick={handleWakeUpClick}>
-        Wake Up Now
-      </Button>
-      <Button color="info" startIcon={<SettingsIcon />} onClick={handleSettingsClick}>
-        Settings
-      </Button>
-    </GridToolbarContainer>
-  );
-}
+import EditDeviceToolbar from '@/components/Admin/DeviceManagement/EditDeviceToolbar';
+import DeviceDetailsOverlay from '@/components/Admin/DeviceManagement/DeviceDetailsOverlay';
 
 const ViewDevicesPage = () => {
   const [deviceData, setDeviceData] = useState<any[]>([]);
@@ -156,7 +120,7 @@ const ViewDevicesPage = () => {
             handleRowSelection(newSelection);
           }}
           slots={{
-            toolbar: EditToolbar as GridSlots['toolbar'],
+            toolbar: EditDeviceToolbar as GridSlots['toolbar'],
           }}
           slotProps={{
             toolbar: { selected, setOpenSettingModal },
@@ -176,118 +140,15 @@ const ViewDevicesPage = () => {
         />
 
         {/* Overlay box */}
-        {isOverlayVisible && selectedDetail && (
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              width: '100%',
-              height: isMaximized ? '100%' : { xs: '70%', md: '400px' },
-              backgroundColor: 'white',
-              border: '1px solid #ccc',
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-              zIndex: 10,
-              p: 3,
-              overflowY: 'auto',
-              transition: 'all 0.3s ease-in-out',
-            }}
-          >
-            {/* Control Buttons */}
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-              <IconButton onClick={handleToggleMaximize}>
-                {isMaximized ? <Minimize /> : <Fullscreen />}
-              </IconButton>
-              <IconButton onClick={handleCloseOverlay}>
-                <Close />
-              </IconButton>
-            </Box>
-
-            {/* Device Details Section */}
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 2 }}>
-              <Typography
-                variant="h6"
-                gutterBottom
-                sx={{ color: 'black', pr: { xs: 2, md: 10 }, fontWeight: 'bold' }}
-              >
-                Device: {selectedDetail?.id}
-              </Typography>
-              <Typography
-                variant="h6"
-                gutterBottom
-                sx={{ color: 'black', pr: { xs: 2, md: 5 }, fontWeight: 'bold' }}
-              >
-                Mac Address: {selectedDetail?.mac}
-              </Typography>
-            </Box>
-
-            {/* Grid Layout for Device Details */}
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                {[
-                  { label: 'ID', value: selectedDetail?.id },
-                  { label: 'Name', value: selectedDetail?.name },
-                  { label: 'IP Address', value: selectedDetail?.ip },
-                  { label: 'MAC Address', value: selectedDetail?.mac },
-                  { label: 'Port', value: selectedDetail?.port },
-                ].map((item, index) => (
-                  <Box key={index} sx={{ mb: 2 }}>
-                    <Typography variant="body2" sx={{ color: 'black' }}>
-                      {item.label}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Typography variant="body1" sx={{ mr: 1, color: 'black' }}>
-                        {item.value}
-                      </Typography>
-                      <IconButton
-                        size="small"
-                        onClick={() => navigator.clipboard.writeText(item.value)}
-                      >
-                        <ContentCopy fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  </Box>
-                ))}
-              </Grid>
-              <Grid item xs={12} md={6}>
-                {[
-                  { label: 'Network Name', value: selectedDetail?.network?.name },
-                  { label: 'Network Address', value: selectedDetail?.network?.network_address },
-                  { label: 'Subnet Mask', value: selectedDetail?.network?.subnet_mask },
-                  { label: 'Broadcast Address', value: selectedDetail?.network?.broadcast_address },
-                  {
-                    label: 'Status',
-                    value: selectedDetail?.status === 'online' ? 'Online' : 'Offline',
-                  },
-                ].map((item, index) => (
-                  <Box key={index} sx={{ mb: 2 }}>
-                    <Typography variant="body2" sx={{ color: 'black' }}>
-                      {item.label}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Typography variant="body1" sx={{ mr: 1, color: 'black' }}>
-                        {item.label !== 'Status' && item.value}
-                        {item.label === 'Status' && (
-                          <Box sx={{ color: item.value.toLowerCase() === 'online' ? 'green' : 'red' }}>
-                            {item.value.toLowerCase() === 'online' ? '● Online' : '● Offline'}
-                          </Box>
-                        )}
-                      </Typography>
-                      <IconButton
-                        size="small"
-                        onClick={() => navigator.clipboard.writeText(item.value)}
-                      >
-                        {item.value && item.label !== 'Status' && <ContentCopy fontSize="small" />}
-                      </IconButton>
-                    </Box>
-                  </Box>
-                ))}
-              </Grid>
-            </Grid>
-          </Box>
-        )}
+        <DeviceDetailsOverlay
+          isOverlayVisible={isOverlayVisible}
+          selectedDetail={selectedDetail}
+          isMaximized={isMaximized}
+          handleToggleMaximize={handleToggleMaximize}
+          handleCloseOverlay={handleCloseOverlay}
+        />
       </Box>
-      <SettingsModal selectedDetail={selectedDetail} openSettingModal={openSettingModal} setOpenSettingModal={setOpenSettingModal}/>
+      <SettingsModal selectedDetail={selectedDetail} openSettingModal={openSettingModal} setOpenSettingModal={setOpenSettingModal} />
     </div>
   );
 };

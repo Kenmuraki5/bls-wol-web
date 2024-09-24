@@ -124,8 +124,13 @@ const SideMenu: React.FC = () => {
               }}
               secondary="View Networks" />
           </ListItemButton>
-          <ListItemButton sx={{ pl: 4 }}>
-            <ListItemText secondary="Configure Networks" />
+          <ListItemButton sx={{ pl: 4 }} onClick={() => Navigate("NetworkManagement/addSubnet")}>
+            <ListItemText 
+              secondaryTypographyProps={{
+                fontSize: 15,
+                color: path === '/admin/NetworkManagement/addSubnet' ? '#3B82F6' : '#0009'
+              }}
+              secondary="Add Subnet" />
           </ListItemButton>
         </List>
       </Collapse>

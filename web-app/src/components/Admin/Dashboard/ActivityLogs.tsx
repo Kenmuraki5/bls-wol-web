@@ -2,7 +2,8 @@
 import React, { useState, useMemo } from 'react';
 import { Box, Typography, Card, TextField, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import WifiIcon from '@mui/icons-material/Wifi';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
 import { DataGrid } from '@mui/x-data-grid';
 
 const ActivityLogs = ({ data_wakeLogs }: any) => {
@@ -43,18 +44,23 @@ const ActivityLogs = ({ data_wakeLogs }: any) => {
       field: 'status',
       headerName: 'Status',
       width: 120,
-      renderCell: (params:any) => {
+      renderCell: (params: any) => {
         const color = getIconColor(params.value);
+        const isFailed = params.value.toLowerCase() === 'failed'; // เช็คว่าเป็น 'failed' หรือไม่
         return (
           <Box display="flex" alignItems="center">
-            <WifiIcon style={{ marginRight: 4, color: color }} />
+            {isFailed ? (
+              <ErrorIcon style={{ marginRight: 4, color: color }} /> // ใช้ ErrorIcon ถ้าเป็น 'failed'
+            ) : (
+              <CheckCircleIcon style={{ marginRight: 4, color: color }} /> // ใช้ CheckCircleIcon สำหรับ 'success'
+            )}
             <Typography variant="body2">{params.value}</Typography>
           </Box>
         );
       },
     },
     { field: 'created_at', headerName: 'Time', width: 200 },
-  ];
+];
 
   const rows = filteredRows.map((log: any) => ({
     id: log.id,

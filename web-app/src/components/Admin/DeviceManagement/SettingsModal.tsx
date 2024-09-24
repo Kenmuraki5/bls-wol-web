@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, Button, Divider, Grid, TextField, FormHelperText } from '@mui/material';
+import { Modal, Box, Typography, Button, Divider, Grid, TextField, FormHelperText, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
@@ -78,11 +78,10 @@ const SettingsModal = ({ setOpenSettingModal, openSettingModal, selectedDetail }
                                 label="Device Name"
                                 variant="standard"
                                 fullWidth
-                                className="mb-4"
                                 value={deviceName}
                                 onChange={(e) => setDeviceName(e.target.value)}
                             />
-                            <FormHelperText>
+                            <FormHelperText className='mb-4'>
                                 Name of the device.
                             </FormHelperText>
 
@@ -90,11 +89,10 @@ const SettingsModal = ({ setOpenSettingModal, openSettingModal, selectedDetail }
                                 label="IP Address"
                                 variant="standard"
                                 fullWidth
-                                className="mb-4"
                                 value={ipAddress}
                                 onChange={(e) => setIpAddress(e.target.value)}
                             />
-                            <FormHelperText>
+                            <FormHelperText className='mb-4'>
                                 The IP address of the network interface card.
                             </FormHelperText>
 
@@ -102,11 +100,10 @@ const SettingsModal = ({ setOpenSettingModal, openSettingModal, selectedDetail }
                                 label="MAC Address"
                                 variant="standard"
                                 fullWidth
-                                className="mb-4"
                                 value={macAddress}
                                 onChange={(e) => setMacAddress(e.target.value)}
                             />
-                            <FormHelperText>
+                            <FormHelperText className='mb-4'>
                                 The MAC address of the target computer. This can be found in the network interface card settings on your computer.
                             </FormHelperText>
 
@@ -114,11 +111,10 @@ const SettingsModal = ({ setOpenSettingModal, openSettingModal, selectedDetail }
                                 label="Port"
                                 variant="standard"
                                 fullWidth
-                                className="mb-4"
                                 value={port}
                                 onChange={(e) => setPort(e.target.value)}
                             />
-                            <FormHelperText>
+                            <FormHelperText className='mb-4'>
                                 The wake-on-LAN port. Usually, port 9 is supported by most ethernet cards, but you can also try 7 or 0.
                             </FormHelperText>
                         </Grid>
