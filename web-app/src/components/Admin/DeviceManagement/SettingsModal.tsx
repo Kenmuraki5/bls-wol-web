@@ -1,13 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, Button, Divider, Grid, TextField, FormHelperText, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
+import { Modal, Box, Typography, Button, Divider, Grid, TextField, FormHelperText } from '@mui/material';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+
+// Utility function to convert IP to numeric
+const ipToNumber = (ip: string) => {
+    return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0);
+};
+
+// Check if IP is within range
+const isIpInRange = (ip: string, startIp: string, endIp: string) => {
+    const ipNum = ipToNumber(ip);
+    const startIpNum = ipToNumber(startIp);
+    const endIpNum = ipToNumber(endIp);
+    return ipNum >= startIpNum && ipNum <= endIpNum;
+};
+
+// Validate IP format (simple check)
+const isValidIp = (ip: string) => {
+    const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    return regex.test(ip);
+};
 
 const SettingsModal = ({ setOpenSettingModal, openSettingModal, selectedDetail }: any) => {
     const [deviceName, setDeviceName] = useState('');
     const [ipAddress, setIpAddress] = useState('');
     const [macAddress, setMacAddress] = useState('');
     const [port, setPort] = useState('');
+    const [ipError, setIpError] = useState('');
 
     useEffect(() => {
         if (openSettingModal && selectedDetail) {
@@ -16,22 +36,65 @@ const SettingsModal = ({ setOpenSettingModal, openSettingModal, selectedDetail }
             setMacAddress(selectedDetail.mac || '');
             setPort(selectedDetail.port || '');
         }
-        console.log(selectedDetail)
     }, [openSettingModal, selectedDetail]);
 
     const handleClose = () => setOpenSettingModal(false);
 
+    // Real-time validation for IP address
+    const handleIpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setIpAddress(value);
+
+        // Check if IP is valid
+        if (!isValidIp(value)) {
+            setIpError('Invalid IP format.');
+            return;
+        }
+
+        // Check if IP is within range
+        const isValid = isIpInRange(value, selectedDetail.network.network_address, selectedDetail.network.broadcast_address);
+        if (!isValid) {
+            setIpError('IP address is out of the valid range.');
+        } else {
+            setIpError(''); // Clear error if valid
+        }
+    };
+
+    const handleUpdate = async () => {
+        if (ipError) return; // Prevent updating if there's an error
+
+        try {
+            const _ = await fetch(`http://${process.env.NEXT_PUBLIC_WEBSOCKET_URL}/api/updateDevice/${selectedDetail?.id}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "name": String(deviceName),
+                        "mac": String(macAddress),
+                        "ip": String(ipAddress),
+                        "port": String(port),
+                        "network_id": String(selectedDetail.network.id)
+                    })
+                }
+            );
+            setOpenSettingModal(false);
+            alert("success");
+        } catch (error:any) {
+            console.log(error);
+            alert(error.message);
+        }
+    };
+
     return (
         <div>
-            {/* Modal component */}
             <Modal
                 open={openSettingModal}
                 onClose={handleClose}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
-                BackdropProps={{
-                    invisible: true,
-                }}
+                BackdropProps={{ invisible: true }}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', zIndex: 10 }}
             >
                 <Box
@@ -57,6 +120,7 @@ const SettingsModal = ({ setOpenSettingModal, openSettingModal, selectedDetail }
                                 variant="outlined"
                                 startIcon={<SaveOutlinedIcon />}
                                 sx={{ mr: 1 }}
+                                onClick={handleUpdate}
                             >
                                 Save
                             </Button>
@@ -81,7 +145,7 @@ const SettingsModal = ({ setOpenSettingModal, openSettingModal, selectedDetail }
                                 value={deviceName}
                                 onChange={(e) => setDeviceName(e.target.value)}
                             />
-                            <FormHelperText className='mb-4'>
+                            <FormHelperText className="mb-4">
                                 Name of the device.
                             </FormHelperText>
 
@@ -90,11 +154,10 @@ const SettingsModal = ({ setOpenSettingModal, openSettingModal, selectedDetail }
                                 variant="standard"
                                 fullWidth
                                 value={ipAddress}
-                                onChange={(e) => setIpAddress(e.target.value)}
+                                onChange={handleIpChange}
+                                error={Boolean(ipError)}
+                                helperText={ipError || 'The IP address of the network interface card.'}
                             />
-                            <FormHelperText className='mb-4'>
-                                The IP address of the network interface card.
-                            </FormHelperText>
 
                             <TextField
                                 label="MAC Address"
@@ -103,8 +166,8 @@ const SettingsModal = ({ setOpenSettingModal, openSettingModal, selectedDetail }
                                 value={macAddress}
                                 onChange={(e) => setMacAddress(e.target.value)}
                             />
-                            <FormHelperText className='mb-4'>
-                                The MAC address of the target computer. This can be found in the network interface card settings on your computer.
+                            <FormHelperText className="mb-4">
+                                The MAC address of the target computer.
                             </FormHelperText>
 
                             <TextField
@@ -114,8 +177,8 @@ const SettingsModal = ({ setOpenSettingModal, openSettingModal, selectedDetail }
                                 value={port}
                                 onChange={(e) => setPort(e.target.value)}
                             />
-                            <FormHelperText className='mb-4'>
-                                The wake-on-LAN port. Usually, port 9 is supported by most ethernet cards, but you can also try 7 or 0.
+                            <FormHelperText className="mb-4">
+                                The wake-on-LAN port.
                             </FormHelperText>
                         </Grid>
                     </Grid>

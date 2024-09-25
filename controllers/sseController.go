@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os/exec"
 	"runtime"
@@ -11,6 +13,7 @@ import (
 	"bls-wol-web/database"
 	"bls-wol-web/models"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
 )
 
@@ -137,58 +140,121 @@ func AdminMonitorByNetwork(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func AdminMonitorAllDevices(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "keep-alive")
+func AdminMonitorAllDevices(rdb *redis.Client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Connection", "keep-alive")
 
-	flusher, ok := w.(http.Flusher)
-	if !ok {
-		http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
-		return
+		flusher, ok := w.(http.Flusher)
+		if !ok {
+			http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
+			return
+		}
+
+		ctx := r.Context()
+
+		for {
+			select {
+			case <-ctx.Done():
+				fmt.Println("Connection closed by client, stopping pings.")
+				return
+			default:
+				var computers []models.Computer
+				if err := database.DB.Preload("Network").Find(&computers).Error; err != nil {
+					fmt.Println("Failed to retrieve computers:", err)
+					http.Error(w, "Database query failed", http.StatusInternalServerError)
+					return
+				}
+
+				for _, computer := range computers {
+					// ส่งข้อมูลคอมพิวเตอร์ไปที่ Redis Queue
+					data, err := json.Marshal(computer)
+					if err != nil {
+						fmt.Println("Failed to marshal data:", err)
+						continue
+					}
+
+					// ส่งงานไปที่ queue
+					err = rdb.RPush(ctx, "computer_tasks", data).Err()
+					if err != nil {
+						fmt.Println("Failed to push task to Redis queue:", err)
+					}
+				}
+
+				// รอผลลัพธ์จาก worker
+				var updatedComputers []models.Computer
+				for i := 0; i < len(computers); i++ {
+					// ดึงผลลัพธ์จาก Redis queue
+					result, err := rdb.BLPop(ctx, 0*time.Second, "computer_results").Result()
+					if err != nil {
+						fmt.Println("Failed to retrieve result from Redis:", err)
+						continue
+					}
+
+					var computer models.Computer
+					err = json.Unmarshal([]byte(result[1]), &computer)
+					if err != nil {
+						fmt.Println("Failed to unmarshal result:", err)
+						continue
+					}
+
+					updatedComputers = append(updatedComputers, computer)
+				}
+
+				// ส่งผลลัพธ์กลับไปที่ client
+				message, err := json.Marshal(updatedComputers)
+				if err != nil {
+					fmt.Println("Failed to marshal data:", err)
+					http.Error(w, "Data marshalling failed", http.StatusInternalServerError)
+					return
+				}
+
+				fmt.Fprintf(w, "data: %s\n\n", message)
+				flusher.Flush()
+
+				time.Sleep(60 * time.Second)
+			}
+		}
 	}
+}
 
-	// ใช้ Context เพื่อตรวจสอบการยกเลิกเมื่อ client ปิดการเชื่อมต่อ
-	ctx := r.Context()
-
+func CheckIPWorker(rdb *redis.Client, ctx context.Context, queue string) {
 	for {
 		select {
 		case <-ctx.Done():
-			fmt.Println("Connection closed by client, stopping pings.")
-			return
+			log.Println("Worker stopped")
+			return // หยุด worker เมื่อ context ถูกยกเลิก
 		default:
-			var computers []models.Computer
-			if err := database.DB.Preload("Network").Find(&computers).Error; err != nil {
-				fmt.Println("Failed to retrieve computers:", err)
-				http.Error(w, "Database query failed", http.StatusInternalServerError)
-				return
-			}
-
-			results := make(chan models.Computer, len(computers))
-			for _, computer := range computers {
-				go func(computer models.Computer) {
-					computer.Status = checkIPStatus(computer.Ip)
-					results <- computer
-				}(computer)
-			}
-
-			var updatedComputers []models.Computer
-			for i := 0; i < len(computers); i++ {
-				updatedComputers = append(updatedComputers, <-results)
-			}
-
-			message, err := json.Marshal(updatedComputers)
+			// ดึงงานจาก queue
+			result, err := rdb.BLPop(ctx, 0*time.Second, "computer_tasks", queue).Result()
 			if err != nil {
-				fmt.Println("Failed to marshal data:", err)
-				http.Error(w, "Data marshalling failed", http.StatusInternalServerError)
-				return
+				fmt.Println("Failed to pop task from Redis:", err)
+				continue
 			}
 
-			fmt.Fprintf(w, "data: %s\n\n", message)
-			flusher.Flush()
+			var computer models.Computer
+			err = json.Unmarshal([]byte(result[1]), &computer)
+			if err != nil {
+				fmt.Println("Failed to unmarshal task data:", err)
+				continue
+			}
 
-			time.Sleep(60 * time.Second)
+			// ตรวจสอบสถานะ IP
+			computer.Status = checkIPStatus(computer.Ip)
+
+			// ส่งผลลัพธ์กลับไปที่ queue
+			data, err := json.Marshal(computer)
+			if err != nil {
+				fmt.Println("Failed to marshal result:", err)
+				continue
+			}
+
+			err = rdb.RPush(ctx, "computer_results", data).Err()
+			if err != nil {
+				fmt.Println("Failed to push result to Redis:", err)
+			}
 		}
 	}
 }

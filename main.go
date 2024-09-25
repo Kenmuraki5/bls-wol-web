@@ -10,14 +10,46 @@ import (
 	"syscall"
 	"time"
 
+	"bls-wol-web/controllers"
 	"bls-wol-web/database"
 	"bls-wol-web/routes"
-	"bls-wol-web/wol"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
+
+type Worker struct {
+	ID    int
+	Redis *redis.Client
+	Ctx   context.Context
+}
+
+func (w *Worker) Start(workerDone chan struct{}) {
+	defer func() { workerDone <- struct{}{} }()
+
+	for {
+		select {
+		case <-w.Ctx.Done():
+			log.Printf("Worker %d stopped\n", w.ID)
+			return
+		default:
+			// Check for tasks in Redis queue
+			fmt.Println("start")
+			task, err := w.Redis.BRPop(w.Ctx, 0, "computer_tasks").Result() // Blocking pop
+			if err != nil {
+				log.Printf("Worker %d: Error checking task queue: %v\n", w.ID, err)
+				time.Sleep(5 * time.Second) // Wait before retrying
+				continue
+			}
+
+			// Process the task (task[1] contains the task data)
+			log.Printf("Worker %d processing task: %s\n", w.ID, task[1])
+			controllers.CheckIPWorker(w.Redis, w.Ctx, task[1]) // Pass the task data if needed
+		}
+	}
+}
 
 func main() {
 	err := godotenv.Load(".env")
@@ -59,19 +91,12 @@ func main() {
 	// Create a channel for shutting down workers
 	workerDone := make(chan struct{})
 
-	numWorkers := 10 // จำนวน worker ที่จะรัน
-	for i := 0; i < numWorkers; i++ {
-		go func() {
-			wol.SendMagicPacket(database.RedisClient, ctx)
-			workerDone <- struct{}{} // Notify when worker is done
-		}()
-	}
+	numWorkers := 10
+	startWorkerPool(database.RedisClient, numWorkers, ctx, workerDone)
 
-	// Setup signal handling to gracefully shutdown
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
-	// Start the server in a goroutine
 	go func() {
 		log.Println("Server started at :" + port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -79,27 +104,35 @@ func main() {
 		}
 	}()
 
-	// Wait for shutdown signal
 	select {
 	case <-signalChan:
 		log.Println("Received shutdown signal, cancelling workers...")
-		cancel() // Cancel the context to stop workers
+		cancel()
 	case <-workerDone:
 		log.Println("Worker has finished processing.")
 	}
 
-	// Wait for the context to be done
 	log.Println("Shutting down server...")
 
-	// Create a context with timeout for shutdown
 	ctxShutdown, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelShutdown()
 
-	// Shutdown the server gracefully
 	if err := srv.Shutdown(ctxShutdown); err != nil {
 		log.Fatalf("Server Shutdown Failed:%+v", err)
 	}
 
 	log.Println("Server exited")
 	log.Println("All workers stopped")
+}
+
+// Function to start the worker pool
+func startWorkerPool(rdb *redis.Client, numWorkers int, ctx context.Context, workerDone chan struct{}) {
+	for i := 0; i < numWorkers; i++ {
+		worker := Worker{
+			ID:    i,
+			Redis: rdb,
+			Ctx:   ctx,
+		}
+		go worker.Start(workerDone)
+	}
 }

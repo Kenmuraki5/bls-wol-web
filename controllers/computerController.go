@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os/exec"
 	"strconv"
+	"strings"
 
 	"bls-wol-web/database"
 	"bls-wol-web/models"
@@ -130,68 +130,66 @@ func DeleteComputer(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func CheckConnections(w http.ResponseWriter, r *http.Request) {
-	var computers []models.Computer
-	if err := database.DB.Find(&computers).Error; err != nil {
-		http.Error(w, fmt.Sprintf("Failed to retrieve computers: %v", err), http.StatusInternalServerError)
+func UpdateComputer(w http.ResponseWriter, r *http.Request) {
+	idStr := strings.TrimPrefix(r.URL.Path, "/api/updateDevice/")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Invalid ID: %v", err), http.StatusBadRequest)
 		return
 	}
 
-	results := make(chan models.Computer, len(computers))
-	for _, computer := range computers {
-		go checkConnection(computer, results)
+	userId := 1
+	var computer models.Computer
+
+	if err := database.DB.Where("id = ?", id).Where("user_id = ?", userId).First(&computer).Error; err != nil {
+		http.Error(w, fmt.Sprintf("Computer not found or you don't have permission: %v", err), http.StatusNotFound)
+		return
 	}
 
-	var updatedComputers []models.Computer
-	for i := 0; i < len(computers); i++ {
-		updatedComputers = append(updatedComputers, <-results)
+	var data map[string]string
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		http.Error(w, fmt.Sprintf("Fail to parse body: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	if newName, ok := data["name"]; ok {
+		computer.Name = newName
+	}
+	if newMac, ok := data["mac"]; ok {
+		if len(newMac) != 17 && len(newMac) != 12 {
+			http.Error(w, "Wrong Mac Address Format", http.StatusBadRequest)
+			return
+		}
+		computer.Mac = newMac
+	}
+	if newIp, ok := data["ip"]; ok {
+		computer.Ip = newIp
+	}
+	if newPort, ok := data["port"]; ok {
+		port, err := strconv.Atoi(newPort)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Fail to convert port: %v", err), http.StatusInternalServerError)
+			return
+		}
+		computer.Port = uint32(port)
+	}
+	if networkId, ok := data["network_id"]; ok {
+		port, err := strconv.Atoi(networkId)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Fail to convert port: %v", err), http.StatusInternalServerError)
+			return
+		}
+		computer.NetworkID = int(port)
+	}
+
+	if err := database.DB.Save(&computer).Error; err != nil {
+		http.Error(w, fmt.Sprintf("Failed to update computer: %v", err), http.StatusInternalServerError)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "Successfully checked connections and updated status",
-		"results": updatedComputers,
+		"message": "Computer updated successfully",
+		"data":    computer,
 	})
-}
-
-func CheckConnectionsByUser(w http.ResponseWriter, r *http.Request) {
-	userIdStr := r.URL.Query().Get("userId")
-	userId, err := strconv.ParseUint(userIdStr, 10, 32)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Invalid User ID: %v", err), http.StatusBadRequest)
-		return
-	}
-
-	var computers []models.Computer
-	if err := database.DB.Where("user_id = ?", userId).Find(&computers).Error; err != nil {
-		http.Error(w, fmt.Sprintf("Failed to retrieve computers: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	results := make(chan models.Computer, len(computers))
-	for _, computer := range computers {
-		go checkConnection(computer, results)
-	}
-
-	var updatedComputers []models.Computer
-	for i := 0; i < len(computers); i++ {
-		updatedComputers = append(updatedComputers, <-results)
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"message": "Successfully checked connections and updated status",
-		"results": updatedComputers,
-	})
-}
-
-func checkConnection(computer models.Computer, results chan models.Computer) {
-	cmd := exec.Command("ping", "-c", "1", computer.Ip)
-	err := cmd.Run()
-	if err != nil {
-		computer.Status = "offline"
-	} else {
-		computer.Status = "online"
-	}
-	results <- computer
 }

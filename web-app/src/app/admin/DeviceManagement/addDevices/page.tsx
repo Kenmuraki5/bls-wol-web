@@ -1,18 +1,19 @@
-"use client"
+'use server'
 import AddDevice from '@/components/Admin/DeviceManagement/AddDevice';
 import React from 'react'
 
 export default async function page() {
-  const existingNetworks = ['Network 1', 'Network 2', 'Network 3'];
-
-    const handleSaveDevice = (deviceData: any) => {
-        console.log('Device Data:', deviceData);
-        // ทำการบันทึกข้อมูลหรืออัพเดตข้อมูลที่นี่
-    };
-
+  let existingNetworks;
+  try {
+    const res = await fetch(`http://${process.env.NEXT_PUBLIC_WEBSOCKET_URL}/api/networks`)
+    const network_data:any = await res.json()
+    existingNetworks = network_data?.data
+  } catch (error:any) {
+    console.log(error.message)
+  }
     return (
         <div>
-            <AddDevice onSave={handleSaveDevice} existingNetworks={existingNetworks} />
+            <AddDevice existingNetworks={existingNetworks} />
         </div>
     );
 }

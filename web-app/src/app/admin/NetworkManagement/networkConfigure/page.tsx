@@ -1,6 +1,6 @@
 "use client"
 import React from 'react'
-import AddSubnet from '@/components/Admin/NetworkManagement/AddSubnet';
+import NetworkConfigure from '@/components/Admin/NetworkManagement/NetworkConfigure';
 
 export default function page() {
   const handleSaveSubnet = (subnetData: any) => {
@@ -11,7 +11,7 @@ export default function page() {
 
   return (
     <div>
-       <AddSubnet onSave={handleSaveSubnet} />
+       <NetworkConfigure onSave={handleSaveSubnet} />
     </div>
   )
 }

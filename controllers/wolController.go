@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
+	"sync"
 	"time"
 
 	"bls-wol-web/database"
@@ -58,80 +58,6 @@ type WolsRequest struct {
 	Ids []int `json:"ids"`
 }
 
-// func Wols(w http.ResponseWriter, r *http.Request) {
-// 	var requestBody WolsRequest
-// 	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
-// 		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	idInts := requestBody.Ids
-
-// 	var wg sync.WaitGroup
-// 	results := make(map[string]map[string]string)
-// 	resultChan := make(chan map[string]string, len(idInts))
-
-// 	for _, id := range idInts {
-// 		wg.Add(1)
-// 		go func(id int) {
-// 			defer wg.Done()
-
-// 			var computer models.Computer
-// 			if err := database.DB.Where("id = ?", id).
-// 				Preload("Network").
-// 				First(&computer).Error; err != nil {
-// 				resultChan <- map[string]string{
-// 					"id":      fmt.Sprintf("%d", id),
-// 					"status":  "failed",
-// 					"message": fmt.Sprintf("Computer Not Found or you don't have permission: %v", err),
-// 				}
-// 				return
-// 			}
-
-// 			status := "success"
-// 			if err := wol.WakeOnLan(computer.Mac, computer.Ip, computer.Network.NetworkAddress, computer.Port); err != nil {
-// 				status = "failed"
-// 				fmt.Println(computer.Mac, computer.Ip)
-// 				fmt.Println("Error:", err)
-// 				resultChan <- map[string]string{
-// 					"id":      fmt.Sprintf("%d", id),
-// 					"status":  status,
-// 					"message": fmt.Sprintf("Fail to WOL: %v", err),
-// 				}
-// 				return
-// 			}
-
-// 			message, logErr := AddWakeLog(computer.Id, computer.UserId, status)
-// 			if logErr != nil {
-// 				resultChan <- map[string]string{
-// 					"id":      fmt.Sprintf("%d", id),
-// 					"status":  status,
-// 					"message": fmt.Sprintf("Failed to add wake log: %v", logErr),
-// 				}
-// 				return
-// 			}
-
-// 			resultChan <- map[string]string{
-// 				"id":      fmt.Sprintf("%d", id),
-// 				"status":  status,
-// 				"message": message,
-// 			}
-// 		}(id)
-// 	}
-
-// 	go func() {
-// 		wg.Wait()
-// 		close(resultChan)
-// 	}()
-
-// 	for result := range resultChan {
-// 		results[result["id"]] = result
-// 	}
-
-// 	w.WriteHeader(http.StatusOK)
-// 	json.NewEncoder(w).Encode(results)
-// }
-
 func Wols(w http.ResponseWriter, r *http.Request) {
 	var requestBody WolsRequest
 	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
@@ -140,62 +66,136 @@ func Wols(w http.ResponseWriter, r *http.Request) {
 	}
 
 	idInts := requestBody.Ids
-	ctx := context.Background()
-	redisClient := database.RedisClient
 
-	var logs []models.WakeLog // สตั๊ดสำหรับล็อกทั้งหมด
-	var results []string      // สำหรับผลลัพธ์แต่ละรายการ
+	var wg sync.WaitGroup
+	results := make(map[string]map[string]string)
+	resultChan := make(chan map[string]string, len(idInts))
 
 	for _, id := range idInts {
-		var computer models.Computer
-		if err := database.DB.Where("id = ?", id).
-			Preload("Network").
-			First(&computer).Error; err != nil {
-			// บันทึกการล็อกข้อผิดพลาด
-			logs = append(logs, models.WakeLog{ComputerId: 0, UserId: 0, Status: "failed"})
-			results = append(results, fmt.Sprintf("Failed to find computer with ID: %d", id))
-			continue
-		}
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
 
-		job := wol.WakeUpJob{
-			MAC:              computer.Mac,
-			IP:               computer.Ip,
-			BroadcastAddress: computer.Network.BroadcastAddress,
-			Port:             int(computer.Port),
-		}
+			var computer models.Computer
+			if err := database.DB.Where("id = ?", id).
+				Preload("Network").
+				First(&computer).Error; err != nil {
+				resultChan <- map[string]string{
+					"id":      fmt.Sprintf("%d", id),
+					"status":  "failed",
+					"message": fmt.Sprintf("Computer Not Found or you don't have permission: %v", err),
+				}
+				return
+			}
 
-		jobData, err := json.Marshal(job)
-		if err != nil {
-			logs = append(logs, models.WakeLog{ComputerId: computer.Id, UserId: computer.UserId, Status: "failed"})
-			results = append(results, fmt.Sprintf("Failed to marshal job for computer ID: %d", id))
-			continue
-		}
+			status := "success"
+			if err := wol.WakeOnLan(computer.Mac, computer.Ip, computer.Network.NetworkAddress, computer.Port); err != nil {
+				status = "failed"
+				fmt.Println(computer.Mac, computer.Ip)
+				fmt.Println("Error:", err)
+				resultChan <- map[string]string{
+					"id":      fmt.Sprintf("%d", id),
+					"status":  status,
+					"message": fmt.Sprintf("Fail to WOL: %v", err),
+				}
+				return
+			}
 
-		if err := redisClient.RPush(ctx, "wake_on_lan_queue", jobData).Err(); err != nil {
-			logs = append(logs, models.WakeLog{ComputerId: computer.Id, UserId: computer.UserId, Status: "failed"})
-			results = append(results, fmt.Sprintf("Failed to add job to Redis for computer ID: %d", id))
-			continue
-		}
+			message, logErr := AddWakeLog(computer.Id, computer.UserId, status)
+			if logErr != nil {
+				resultChan <- map[string]string{
+					"id":      fmt.Sprintf("%d", id),
+					"status":  status,
+					"message": fmt.Sprintf("Failed to add wake log: %v", logErr),
+				}
+				return
+			}
 
-		// บันทึกการล็อกสำเร็จ
-		logs = append(logs, models.WakeLog{ComputerId: computer.Id, UserId: computer.UserId, Status: "success"})
-		results = append(results, fmt.Sprintf("Job scheduled successfully for computer ID: %d", id))
+			resultChan <- map[string]string{
+				"id":      fmt.Sprintf("%d", id),
+				"status":  status,
+				"message": message,
+			}
+		}(id)
 	}
 
-	// บันทึกข้อมูลล็อกทั้งหมดในฐานข้อมูล
-	for _, log := range logs {
-		_, _ = AddWakeLog(log.ComputerId, log.UserId, log.Status)
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
+
+	for result := range resultChan {
+		results[result["id"]] = result
 	}
 
-	// ส่งการตอบกลับ
-	if len(results) > 0 {
-		w.WriteHeader(http.StatusAccepted)
-		json.NewEncoder(w).Encode(map[string]string{"message": fmt.Sprintf("%d jobs processed", len(results)), "details": strings.Join(results, "; ")})
-	} else {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"message": "No jobs processed successfully"})
-	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(results)
 }
+
+// func Wols(w http.ResponseWriter, r *http.Request) {
+// 	var requestBody WolsRequest
+// 	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+// 		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
+// 		return
+// 	}
+
+// 	idInts := requestBody.Ids
+// 	ctx := context.Background()
+// 	redisClient := database.RedisClient
+
+// 	var logs []models.WakeLog // สตั๊ดสำหรับล็อกทั้งหมด
+// 	var results []string      // สำหรับผลลัพธ์แต่ละรายการ
+
+// 	for _, id := range idInts {
+// 		var computer models.Computer
+// 		if err := database.DB.Where("id = ?", id).
+// 			Preload("Network").
+// 			First(&computer).Error; err != nil {
+// 			// บันทึกการล็อกข้อผิดพลาด
+// 			logs = append(logs, models.WakeLog{ComputerId: 0, UserId: 0, Status: "failed"})
+// 			results = append(results, fmt.Sprintf("Failed to find computer with ID: %d", id))
+// 			continue
+// 		}
+
+// 		job := wol.WakeUpJob{
+// 			MAC:              computer.Mac,
+// 			IP:               computer.Ip,
+// 			BroadcastAddress: computer.Network.BroadcastAddress,
+// 			Port:             int(computer.Port),
+// 		}
+
+// 		jobData, err := json.Marshal(job)
+// 		if err != nil {
+// 			logs = append(logs, models.WakeLog{ComputerId: computer.Id, UserId: computer.UserId, Status: "failed"})
+// 			results = append(results, fmt.Sprintf("Failed to marshal job for computer ID: %d", id))
+// 			continue
+// 		}
+
+// 		if err := redisClient.RPush(ctx, "wake_on_lan_queue", jobData).Err(); err != nil {
+// 			logs = append(logs, models.WakeLog{ComputerId: computer.Id, UserId: computer.UserId, Status: "failed"})
+// 			results = append(results, fmt.Sprintf("Failed to add job to Redis for computer ID: %d", id))
+// 			continue
+// 		}
+
+// 		// บันทึกการล็อกสำเร็จ
+// 		logs = append(logs, models.WakeLog{ComputerId: computer.Id, UserId: computer.UserId, Status: "success"})
+// 		results = append(results, fmt.Sprintf("Job scheduled successfully for computer ID: %d", id))
+// 	}
+
+// 	// บันทึกข้อมูลล็อกทั้งหมดในฐานข้อมูล
+// 	for _, log := range logs {
+// 		_, _ = AddWakeLog(log.ComputerId, log.UserId, log.Status)
+// 	}
+
+// 	// ส่งการตอบกลับ
+// 	if len(results) > 0 {
+// 		w.WriteHeader(http.StatusAccepted)
+// 		json.NewEncoder(w).Encode(map[string]string{"message": fmt.Sprintf("%d jobs processed", len(results)), "details": strings.Join(results, "; ")})
+// 	} else {
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		json.NewEncoder(w).Encode(map[string]string{"message": "No jobs processed successfully"})
+// 	}
+// }
 
 type WolRequest struct {
 	MacAddress       string `json:"mac_address"`

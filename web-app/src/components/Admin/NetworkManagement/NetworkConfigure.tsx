@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography, TextField, FormHelperText, Divider } from '@mui/material';
 
-const AddSubnet = ({ onSave }: { onSave: (subnetData: any) => void }) => {
+const NetworkConfigure = ({ onSave }: { onSave: (subnetData: any) => void }) => {
     const [subnetName, setSubnetName] = useState('');
     const [networkAddress, setNetworkAddress] = useState('');
     const [subnetMask, setSubnetMask] = useState('');
@@ -25,7 +25,7 @@ const AddSubnet = ({ onSave }: { onSave: (subnetData: any) => void }) => {
 
     return (
         <Box className="text-black p-4">
-            <Typography variant="h6" className="mb-4">Add New Subnet</Typography>
+            <Typography variant="h6" className="mb-4">Network Settings</Typography>
             <Box sx={{ backgroundColor: '#f0f4ff', padding: 2, borderRadius: 1, marginBottom: 4 }}>
                 <Typography variant="body2">
                     Please fill in the details for the new subnet you want to add.
@@ -80,4 +80,4 @@ const AddSubnet = ({ onSave }: { onSave: (subnetData: any) => void }) => {
     );
 };
 
-export default AddSubnet;
+export default NetworkConfigure;
