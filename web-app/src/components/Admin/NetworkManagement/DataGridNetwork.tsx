@@ -42,7 +42,7 @@ export default function DataGridNetwork({network_data}: any) {
 
   return (
     <div className='overflow-hidden'>
-      <Typography variant="h4" component="h1" className="text-primary" color="black">
+      <Typography variant="h4" component="h1" className="text-primary">
         Networks
       </Typography>
       <Typography variant="subtitle1" component="p" color="textSecondary">
@@ -67,18 +67,6 @@ export default function DataGridNetwork({network_data}: any) {
               noRowsVariant: 'linear-progress',
             },
             toolbar: { selected, setOpenSettingModal },
-          }}
-          sx={{
-            backgroundColor: '#ffffff',
-            '& .MuiDataGrid-row': {
-              backgroundColor: '#fafafa',
-            },
-            '& .MuiDataGrid-row:hover': {
-              backgroundColor: '#f0f0f0',
-            },
-            '& .MuiDataGrid-cell': {
-              padding: '10px',
-            },
           }}
         />
         <NetworkDetailsOverlay

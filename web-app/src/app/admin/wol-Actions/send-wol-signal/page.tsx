@@ -30,16 +30,16 @@ export default function SendWoLSignalPage() {
 
   return (
     <div className="p-4 w-full mt-5">
-      <Typography variant="h4" component="h1" className="text-primary" color="black">
+      <Typography variant="h4" component="h1" className="text-primary">
         Wake-on-lan - Magic Packet
       </Typography>
       <Typography variant="subtitle1" component="p" color="textSecondary">
         Monitor the status and manage Devices in your organization.
       </Typography>
-      <h2 className="text-xl font-bold mb-4 text-black">Wake on LAN Action</h2>
+      <h2 className="text-xl font-bold mb-4">Wake on LAN Action</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-gray-700 mb-1" htmlFor="macAddress">MAC Address</label>
+          <label className="block mb-1" htmlFor="macAddress">MAC Address</label>
           <input
             type="text"
             id="macAddress"
@@ -55,7 +55,7 @@ export default function SendWoLSignalPage() {
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700 mb-1" htmlFor="ipAddress">IP Address</label>
+          <label className="block mb-1" htmlFor="ipAddress">IP Address</label>
           <input
             type="text"
             id="ipAddress"
@@ -71,7 +71,7 @@ export default function SendWoLSignalPage() {
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700 mb-1" htmlFor="pingAddress">Ping Address</label>
+          <label className="block mb-1" htmlFor="pingAddress">Ping Address</label>
           <input
             type="text"
             id="pingAddress"
@@ -87,7 +87,7 @@ export default function SendWoLSignalPage() {
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700 mb-1" htmlFor="port">Port</label>
+          <label className="block mb-1" htmlFor="port">Port</label>
           <input
             type="number"
             id="port"

@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import { List, ListItemIcon, ListItemText, Collapse, Link, ListItemButton } from '@mui/material';
+import { List, ListItemIcon, ListItemText, Collapse, ListItemButton } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import DevicesIcon from '@mui/icons-material/Devices';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
@@ -12,6 +12,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 const SideMenu: React.FC = () => {
   const [open, setOpen] = React.useState<{ [key: string]: boolean }>({
@@ -29,7 +30,7 @@ const SideMenu: React.FC = () => {
   return (
     <List sx={{ color: 'black' }}>
       {/* Dashboard */}
-      <Link href="/admin" underline="none">
+      <Link href="/admin">
         <ListItemButton>
           <ListItemIcon>
             <DashboardIcon style={{ color: path === '/admin' ? '#3B82F6' : '#0009' }} />
@@ -54,7 +55,7 @@ const SideMenu: React.FC = () => {
       </ListItemButton>
       <Collapse in={open.deviceManagement} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          <Link href="/admin/DeviceManagement/viewDevices" underline="none">
+          <Link href="/admin/DeviceManagement/viewDevices">
             <ListItemButton sx={{ pl: 4 }}>
               <ListItemText
                 secondaryTypographyProps={{
@@ -65,7 +66,7 @@ const SideMenu: React.FC = () => {
               />
             </ListItemButton>
           </Link>
-          <Link href="/admin/DeviceManagement/addDevices" underline="none">
+          <Link href="/admin/DeviceManagement/addDevices">
             <ListItemButton sx={{ pl: 4 }}>
               <ListItemText
                 secondaryTypographyProps={{
@@ -89,7 +90,7 @@ const SideMenu: React.FC = () => {
       </ListItemButton>
       <Collapse in={open.wolActions} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          <Link href="/admin/wol-Actions/send-wol-signal" underline="none">
+          <Link href="/admin/wol-Actions/send-wol-signal">
             <ListItemButton sx={{ pl: 4 }}>
               <ListItemText
                 secondaryTypographyProps={{
@@ -100,7 +101,7 @@ const SideMenu: React.FC = () => {
               />
             </ListItemButton>
           </Link>
-          <Link href="/admin/wol-Actions/scheduler" underline="none">
+          <Link href="/admin/wol-Actions/scheduler">
             <ListItemButton sx={{ pl: 4 }}>
               <ListItemText
                 secondaryTypographyProps={{
@@ -124,7 +125,7 @@ const SideMenu: React.FC = () => {
       </ListItemButton>
       <Collapse in={open.networkManagement} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          <Link href="/admin/NetworkManagement/viewNetworks" underline="none">
+          <Link href="/admin/NetworkManagement/viewNetworks">
             <ListItemButton sx={{ pl: 4 }}>
               <ListItemText
                 secondaryTypographyProps={{
@@ -135,7 +136,7 @@ const SideMenu: React.FC = () => {
               />
             </ListItemButton>
           </Link>
-          <Link href="/admin/NetworkManagement/networkConfigure" underline="none">
+          <Link href="/admin/NetworkManagement/networkConfigure">
             <ListItemButton sx={{ pl: 4 }}>
               <ListItemText
                 secondaryTypographyProps={{
@@ -150,7 +151,7 @@ const SideMenu: React.FC = () => {
       </Collapse>
 
       {/* Logs & Activity Monitoring */}
-      <Link href="/admin/LogMonitoring" underline="none">
+      <Link href="/admin/LogMonitoring">
         <ListItemButton>
           <ListItemIcon style={{ color: path === '/admin/LogMonitoring' ? '#3B82F6' : '#0009' }}>
             <AssignmentIcon />

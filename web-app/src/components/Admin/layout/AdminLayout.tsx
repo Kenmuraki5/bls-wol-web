@@ -1,78 +1,160 @@
-'use client'
-import SideMenu from '@/components/SideMenu';
-import { Box, Drawer, IconButton, Typography, useMediaQuery } from '@mui/material';
-import React, { useState } from 'react';
-import {
-  Menu as MenuIcon,
-} from '@mui/icons-material';
+'use client';
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import { createTheme } from '@mui/material/styles';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import DevicesIcon from '@mui/icons-material/Devices';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import LayersIcon from '@mui/icons-material/Layers';
+import { AppProvider } from '@toolpad/core/AppProvider';
+import { DashboardLayout } from '@toolpad/core/DashboardLayout';
+import type { ReactNode } from 'react';
+import Container from '@mui/material/Container';
+import { useRouter, usePathname } from 'next/navigation'; // ใช้ usePathname เพื่อดึงข้อมูล pathname จาก URL
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
-  const isMobile = useMediaQuery('(max-width:600px)');
-  const navbarHeight = '64px';
+const NAVIGATION: any = [
+  {
+    kind: 'header',
+    title: 'Main items',
+  },
+  {
+    segment: 'admin',
+    title: 'Dashboard',
+    icon: <DashboardIcon />,
+  },
+  {
+    kind: 'divider',
+  },
+  {
+    kind: 'header',
+    title: 'Management',
+  },
+  {
+    segment: 'admin/DeviceManagement',
+    title: 'Device Management',
+    icon: <DevicesIcon />,
+    children: [
+      {
+        segment: 'viewDevices',
+        title: 'View Devices',
+      },
+      {
+        segment: 'addDevices',
+        title: 'Add Device',
+      },
+    ],
+  },
+  {
+    segment: 'admin/wol-Actions',
+    title: 'Wake-on-LAN Actions',
+    icon: <PowerSettingsNewIcon />,
+    children: [
+      {
+        segment: 'send-wol-signal',
+        title: 'Send WOL Signal',
+      },
+      {
+        segment: 'scheduler',
+        title: 'Schedule WOL',
+      },
+    ],
+  },
+  {
+    segment: 'admin/NetworkManagement',
+    title: 'Network Management',
+    icon: <SettingsEthernetIcon />,
+    children: [
+      {
+        segment: 'viewNetworks',
+        title: 'View Networks',
+      },
+      {
+        segment: 'networkConfigure',
+        title: 'Network Configure',
+      },
+    ],
+  },
+  {
+    segment: 'admin/LogMonitoring',
+    title: 'Logs & Activity Monitoring',
+    icon: <AssignmentIcon />,
+  },
+  {
+    segment: 'integrations',
+    title: 'Integrations',
+    icon: <LayersIcon />,
+  },
+];
 
-  const handleToggleSidebar = () => {
-    setSidebarOpen((prev) => !prev);
-  };
+const demoTheme = createTheme({
+  cssVariables: {
+    colorSchemeSelector: 'data-toolpad-color-scheme',
+  },
+  colorSchemes: { light: true, dark: true },
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 600,
+      lg: 1200,
+      xl: 1536,
+    },
+  },
+});
 
+function AdminPageContent({ pathname, children }: { pathname: string; children: ReactNode }) {
   return (
-    <Box sx={{ display: 'flex', height: '100vh', backgroundColor: 'white' }}>
-      {isMobile ? (
-        <Drawer open={isSidebarOpen} onClose={handleToggleSidebar}>
-          <SideMenu />
-        </Drawer>
-      ) : (
-        isSidebarOpen && (
-          <Box
-            sx={{
-              position: 'fixed',
-              top: navbarHeight,
-              left: 0,
-              width: '250px',
-              height: `calc(100vh - ${navbarHeight})`,
-              borderRight: '1px solid #ddd',
-              zIndex: 1000,
-              display: 'flex',
-              flexDirection: 'column',
-              bgcolor: 'white',
-              overflowY: 'auto',
-            }}
-          >
-            <SideMenu />
-          </Box>
-        )
-      )}
       <Box
         sx={{
-          flex: 1,
-          mt: navbarHeight,
-          ml: isSidebarOpen && !isMobile ? '250px' : '0',
-          overflowX: 'hidden',
-          p: { xs: 2, md: 3 },
-          position: 'relative',
-          display: isMobile && isSidebarOpen ? 'none' : 'block',
+          m: 4,
         }}
       >
-        <header>
-          <IconButton onClick={handleToggleSidebar} sx={{ mr: 2, border: '1px solid #ddd' }}>
-            <MenuIcon />
-          </IconButton>
-        </header>
-        
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            // Adjust layout and padding for different screen sizes
-            p: { xs: 1, sm: 2, md: 3 },
-            maxWidth: { xs: '100%', md: '100%' }, // Example max width for larger screens
-            mx: 'auto',
-          }}
-        >
-          {children}
-        </Box>
+        {pathname}
+        {children}
       </Box>
-    </Box>
+  );
+}
+
+interface DemoProps {
+  window?: () => Window;
+  children?: ReactNode;
+}
+
+export default function AdminLayout(props: DemoProps) {
+  const { window, children } = props;
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleNavigation = (path: string) => {
+    router.push(path);
+  };
+
+  const customRouter: any = React.useMemo(() => {
+    return {
+      pathname,
+      searchParams: new URLSearchParams(),
+      navigate: handleNavigation,
+    };
+  }, [pathname]);
+
+  const demoWindow = window !== undefined ? window() : undefined;
+
+  return (
+    <AppProvider
+      navigation={NAVIGATION}
+      branding={{
+        logo: <PowerSettingsNewIcon className='mt-2'/>,
+        title: 'BLS WOL-WEB',
+      }}
+      router={customRouter}
+      theme={demoTheme}
+      window={demoWindow}
+    >
+      <DashboardLayout>
+        <AdminPageContent pathname={pathname}>{children}</AdminPageContent>
+      </DashboardLayout>
+    </AppProvider>
   );
 }

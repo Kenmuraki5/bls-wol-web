@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Box, Typography, Button, Divider, Grid, TextField, FormHelperText } from '@mui/material';
+import { Modal, Box, Typography, Button, Divider, Grid, TextField, FormHelperText, useTheme } from '@mui/material';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
@@ -10,6 +10,7 @@ export default function SettingsModal({ setOpenSettingModal, openSettingModal, s
   const [subnet_mask, setSubnetmask] = useState('');
   const [broadcast_address, setBroadcastAddress] = useState('');
 
+  const theme = useTheme();
   useEffect(() => {
     if (openSettingModal && selectedDetail) {
       setNetworkId(selectedDetail.network_id || '');
@@ -38,7 +39,7 @@ export default function SettingsModal({ setOpenSettingModal, openSettingModal, s
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', zIndex: 10 }}
       >
         <Box
-          className="bg-white p-6 shadow-lg"
+          className="p-6 shadow-lg"
           sx={{
             width: '100%',
             maxWidth: '600px',
@@ -47,9 +48,10 @@ export default function SettingsModal({ setOpenSettingModal, openSettingModal, s
             position: 'fixed',
             top: 64,
             right: 0,
+            backgroundColor: theme.palette.mode === 'dark' ? '#424242' : '#fff', // สีพื้นหลังตามธีม
           }}
         >
-          <Box className="flex items-center justify-between mb-4 text-black">
+          <Box className="flex items-center justify-between mb-4">
             <Box sx={{ alignItems: 'center' }}>
               <Typography>
                 SETTING

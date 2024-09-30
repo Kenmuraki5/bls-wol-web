@@ -16,10 +16,9 @@ const AddDevice = ({ existingNetworks }: { existingNetworks: any[]; }) => {
             ipAddress,
             macAddress,
             port,
-            network: selectedNetwork, // Use selected network or new network
+            network: selectedNetwork,
         };
         console.log(deviceData)
-        // Reset fields after saving
         setDeviceName('');
         setIpAddress('');
         setMacAddress('');
@@ -38,9 +37,9 @@ const AddDevice = ({ existingNetworks }: { existingNetworks: any[]; }) => {
     };
 
     return (
-        <Box className="text-black p-4">
+        <Box className="p-4">
             <Typography variant="h6" className="mb-4">Add New Device</Typography>
-            <Box sx={{ backgroundColor: '#f0f4ff', padding: 2, borderRadius: 1, marginBottom: 4 }}>
+            <Box sx={{ backgroundColor: '#f0f4ff', padding: 2, borderRadius: 1, marginBottom: 4, color:'black' }}>
                 <Typography variant="body2">
                     Please fill in the details for the new device you want to add.
                     You can either choose an existing network or create a new one.
@@ -141,7 +140,7 @@ const AddDevice = ({ existingNetworks }: { existingNetworks: any[]; }) => {
 
                     {/* Create New Network Button */}
                     <Link
-                        href="/admin/NetworkManagement/addSubnet" variant="body2"
+                        href="/admin/NetworkManagement/networkConfigure" variant="body2"
                         style={{ marginLeft: '16px' }}
                         target="_blank"
                         rel="noopener noreferrer"

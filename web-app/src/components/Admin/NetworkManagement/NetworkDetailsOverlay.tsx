@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Grid, Typography, IconButton } from '@mui/material';
+import { Box, Grid, Typography, IconButton, useTheme } from '@mui/material';
 import { Minimize, Fullscreen, Close, ContentCopy } from '@mui/icons-material';
 
 const NetworkDetailsOverlay = ({
@@ -9,6 +9,7 @@ const NetworkDetailsOverlay = ({
   handleToggleMaximize,
   handleCloseOverlay,
 }: any) => {
+  const theme = useTheme(); // เข้าถึงธีม\\\
   if (!isOverlayVisible || !selectedDetail) return null;
 
   return (
@@ -19,7 +20,7 @@ const NetworkDetailsOverlay = ({
         left: 0,
         width: '100%',
         height: isMaximized ? '100%' : { xs: '70%', md: '400px' },
-        backgroundColor: 'white',
+        backgroundColor: theme.palette.mode === 'dark' ? '#424242' : '#fff', // สีพื้นหลังตามธีม
         border: '1px solid #ccc',
         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
         zIndex: 10,
@@ -43,7 +44,7 @@ const NetworkDetailsOverlay = ({
         <Typography
           variant="h6"
           gutterBottom
-          sx={{ color: 'black', pr: { xs: 2, md: 10 }, fontWeight: 'bold' }}
+          sx={{ pr: { xs: 2, md: 10 }, fontWeight: 'bold' }}
         >
           Network ID: {selectedDetail?.network_id}
         </Typography>
@@ -63,11 +64,11 @@ const NetworkDetailsOverlay = ({
             },
           ].map((item, index) => (
             <Box key={index} sx={{ mb: 2 }}>
-              <Typography variant="body2" sx={{ color: 'black' }}>
+              <Typography variant="body2">
                 {item.label}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="body1" sx={{ mr: 1, color: 'black' }}>
+                <Typography variant="body1" sx={{ mr: 1 }}>
                   {item.label !== 'Status' && item.value}
                   {item.label === 'Status' && (
                     <Box sx={{ color: item.value.toLowerCase() === 'online' ? 'green' : 'red' }}>

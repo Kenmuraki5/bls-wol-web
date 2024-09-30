@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Grid, Typography, IconButton } from '@mui/material';
+import { Box, Grid, Typography, IconButton, useTheme } from '@mui/material';
 import { Minimize, Fullscreen, Close, ContentCopy } from '@mui/icons-material';
 
 const DeviceDetailsOverlay = ({
@@ -9,6 +9,8 @@ const DeviceDetailsOverlay = ({
   handleToggleMaximize,
   handleCloseOverlay,
 }: any) => {
+  const theme = useTheme(); // เข้าถึงธีม
+
   if (!isOverlayVisible || !selectedDetail) return null;
 
   return (
@@ -19,13 +21,12 @@ const DeviceDetailsOverlay = ({
         left: 0,
         width: '100%',
         height: isMaximized ? '100%' : { xs: '70%', md: '400px' },
-        backgroundColor: 'white',
         border: '1px solid #ccc',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
         zIndex: 10,
         p: 3,
         overflowY: 'auto',
         transition: 'all 0.3s ease-in-out',
+        backgroundColor: theme.palette.mode === 'dark' ? '#424242' : '#fff', // สีพื้นหลังตามธีม
       }}
     >
       {/* Control Buttons */}
@@ -43,14 +44,14 @@ const DeviceDetailsOverlay = ({
         <Typography
           variant="h6"
           gutterBottom
-          sx={{ color: 'black', pr: { xs: 2, md: 10 }, fontWeight: 'bold' }}
+          sx={{ pr: { xs: 2, md: 10 }, fontWeight: 'bold' }}
         >
           Device: {selectedDetail?.id}
         </Typography>
         <Typography
           variant="h6"
           gutterBottom
-          sx={{ color: 'black', pr: { xs: 2, md: 5 }, fontWeight: 'bold' }}
+          sx={{ pr: { xs: 2, md: 5 }, fontWeight: 'bold' }}
         >
           Mac Address: {selectedDetail?.mac}
         </Typography>
@@ -67,11 +68,11 @@ const DeviceDetailsOverlay = ({
             { label: 'Port', value: selectedDetail?.port },
           ].map((item, index) => (
             <Box key={index} sx={{ mb: 2 }}>
-              <Typography variant="body2" sx={{ color: 'black' }}>
+              <Typography variant="body2">
                 {item.label}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="body1" sx={{ mr: 1, color: 'black' }}>
+                <Typography variant="body1" sx={{ mr: 1 }}>
                   {item.value}
                 </Typography>
                 <IconButton
@@ -96,11 +97,11 @@ const DeviceDetailsOverlay = ({
             },
           ].map((item, index) => (
             <Box key={index} sx={{ mb: 2 }}>
-              <Typography variant="body2" sx={{ color: 'black' }}>
+              <Typography variant="body2">
                 {item.label}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="body1" sx={{ mr: 1, color: 'black' }}>
+                <Typography variant="body1" sx={{ mr: 1 }}>
                   {item.label !== 'Status' && item.value}
                   {item.label === 'Status' && (
                     <Box sx={{ color: item.value.toLowerCase() === 'online' ? 'green' : 'red' }}>

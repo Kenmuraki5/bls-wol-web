@@ -3,18 +3,8 @@ import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
-  CircularProgress,
-  IconButton,
-  Grid,
 } from '@mui/material';
-import { DataGrid, GridRowParams, GridSlots } from '@mui/x-data-grid';
-import {
-  Close,
-  Minimize,
-  Fullscreen,
-  ContentCopy,
-  Menu as MenuIcon,
-} from '@mui/icons-material';
+import { DataGrid, GridSlots } from '@mui/x-data-grid';
 import WifiIcon from '@mui/icons-material/Wifi';
 import SettingsModal from '@/components/Admin/DeviceManagement/SettingsModal';
 import EditDeviceToolbar from '@/components/Admin/DeviceManagement/EditDeviceToolbar';
@@ -85,8 +75,8 @@ const ViewDevicesPage = () => {
 
 
   return (
-    <div className='overflow-hidden'>
-      <Typography variant="h4" component="h1" className="text-primary" color="black">
+    <Box className='overflow-hidden'>
+      <Typography variant="h4" component="h1" className="text-primary">
         Wake-on-lan Devices
       </Typography>
       <Typography variant="subtitle1" component="p" color="textSecondary">
@@ -111,18 +101,6 @@ const ViewDevicesPage = () => {
             },
             toolbar: { selected, setOpenSettingModal },
           }}
-          sx={{
-            backgroundColor: '#ffffff',
-            '& .MuiDataGrid-row': {
-              backgroundColor: '#fafafa',
-            },
-            '& .MuiDataGrid-row:hover': {
-              backgroundColor: '#f0f0f0',
-            },
-            '& .MuiDataGrid-cell': {
-              padding: '10px',
-            },
-          }}
         />
 
         {/* Overlay box */}
@@ -135,7 +113,7 @@ const ViewDevicesPage = () => {
         />
       </Box>
       <SettingsModal selectedDetail={selectedDetail} openSettingModal={openSettingModal} setOpenSettingModal={setOpenSettingModal} />
-    </div>
+    </Box>
   );
 };
 

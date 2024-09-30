@@ -18,8 +18,9 @@ export default async function Dashboard() {
     } catch (error) {
         console.log(error);
     }
+
     return (
-        <div className='text-black'>
+        <div>
             {/* Header */}
             <Box className="mb-8">
                 <Typography variant="h4" component="h1" className="text-primary mb-4">
@@ -56,10 +57,14 @@ export default async function Dashboard() {
             </Grid>
 
             {/* Activity Logs */}
-            <Typography variant="h5" className="mt-8 mb-4">
-                Recent Activity Logs
-            </Typography>
-            <ActivityLogs data_wakeLogs={data_wakeLogs} />
+            <Grid item xs={12} md={12}>
+                <Typography variant="h5" className="mt-8 mb-4">
+                    Recent Activity Logs
+                </Typography>
+                <ActivityLogs data_wakeLogs={data_wakeLogs} />
+                
+            </Grid>
+
         </div>
     )
 }

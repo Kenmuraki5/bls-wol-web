@@ -60,9 +60,9 @@ const ActivityLogs = ({ data_wakeLogs }: any) => {
       },
     },
     { field: 'created_at', headerName: 'Time', width: 200 },
-];
+  ];
 
-  const rows = filteredRows.map((log: any) => ({
+  const rows = filteredRows?.map((log: any) => ({
     id: log.id,
     computer_name: log.computer.name,
     computer_ip: log.computer.ip,
@@ -73,8 +73,7 @@ const ActivityLogs = ({ data_wakeLogs }: any) => {
 
   return (
     <Box>
-      <Card className="shadow-sm p-4 bg-slate-50">
-        {/* Search Bar with Icon */}
+      <Card className="shadow-sm p-4">
         <TextField
           label="Search"
           variant="outlined"
@@ -91,11 +90,15 @@ const ActivityLogs = ({ data_wakeLogs }: any) => {
           }}
         />
         {rows.length > 0 ? (
-          <div style={{ height: 450, width: '100%', backgroundColor: 'white' }}>
-            <DataGrid rows={rows} columns={columns} />
-          </div>
+          <Box sx={{ width: '100%', height: 400 }}>
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              style={{ marginTop: '1rem' }}
+            />
+          </Box>
         ) : (
-          <Typography variant="body1" color="textSecondary">
+          <Typography variant="body1" color="textSecondary" align="center" style={{ marginTop: '1rem' }}>
             No recent activity yet.
           </Typography>
         )}
